@@ -1,0 +1,32 @@
+services:
+  api:
+    build:
+      target: development
+    volumes:
+      - ./apps/api/src:/app/apps/api/src
+      - ./packages:/app/packages
+    command: bun run dev:api
+
+  landing:
+    build:
+      target: development
+    volumes:
+      - ./apps/landing/src:/app/apps/landing/src
+      - ./packages:/app/packages
+    command: bun run dev:landing
+
+  app:
+    build:
+      target: development
+    volumes:
+      - ./apps/app/src:/app/apps/app/src
+      - ./packages:/app/packages
+    command: bun run dev:app
+
+  backoffice:
+    build:
+      target: development
+    volumes:
+      - ./apps/backoffice/src:/app/apps/backoffice/src
+      - ./packages:/app/packages
+    command: bun run dev:backoffice

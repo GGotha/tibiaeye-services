@@ -1,0 +1,181 @@
+export interface User {
+  id: string;
+  email: string;
+  name: string | null;
+  avatar: string | null;
+  role: "user" | "admin";
+  createdAt: string;
+}
+
+export interface Character {
+  id: string;
+  name: string;
+  world: string;
+  level: number | null;
+  vocation: string | null;
+  createdAt: string;
+}
+
+export interface CharacterWithStatus extends Character {
+  hasActiveSession: boolean;
+  activeSessionId: string | null;
+}
+
+export interface Session {
+  id: string;
+  characterId: string;
+  characterName: string;
+  huntLocation: string | null;
+  status: "active" | "completed" | "crashed";
+  startedAt: string;
+  endedAt: string | null;
+  totalKills: number;
+  totalExperience: string;
+  totalLootValue: number;
+  xpPerHour: number;
+  duration: number;
+}
+
+export interface SessionDetail extends Session {
+  kills: Kill[];
+  loot: Loot[];
+  experienceSnapshots: ExperienceSnapshot[];
+}
+
+export interface Kill {
+  id: string;
+  creatureName: string;
+  experienceGained: number | null;
+  killedAt: string;
+}
+
+export interface Loot {
+  id: string;
+  itemName: string;
+  quantity: number;
+  estimatedValue: number | null;
+  lootedAt: string;
+}
+
+export interface ExperienceSnapshot {
+  experience: number;
+  level: number;
+  recordedAt: string;
+}
+
+export interface ExperienceHourly {
+  xpPerHourAverage: number;
+  dataPoints: Array<{
+    timestamp: string;
+    xpPerHour: number;
+    level: number;
+  }>;
+}
+
+export interface KillsByCreature {
+  creatureName: string;
+  totalKills: number;
+  totalExperience: number;
+}
+
+export interface LootSummary {
+  items: Array<{
+    itemName: string;
+    totalQuantity: number;
+    totalValue: number;
+  }>;
+  totalValue: number;
+}
+
+export interface LicenseStatus {
+  id: string;
+  status: "active" | "revoked";
+  keyPrefix: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+  totalRequests: number;
+  subscription: {
+    id: string;
+    status: "active" | "cancelled" | "past_due" | "trialing";
+    currentPeriodEnd: string;
+    daysRemaining: number;
+  };
+}
+
+export interface Subscription {
+  id: string;
+  planId: string;
+  plan: {
+    name: string;
+    price: number;
+  };
+  status: "active" | "cancelled" | "past_due";
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+}
+
+export interface BotStatus {
+  hpPercent: number;
+  manaPercent: number;
+  botState: "running" | "paused" | "reconnecting" | "stopped";
+  targetCreature: string | null;
+  currentTask: string | null;
+}
+
+export interface ProfitSession {
+  sessionId: string;
+  huntLocation: string | null;
+  duration: number;
+  lootValue: number;
+  suppliesCost: number;
+  netProfit: number;
+  startedAt: string;
+}
+
+export interface ProfitData {
+  totalRevenue: number;
+  totalCost: number;
+  netProfit: number;
+  profitPerHour: number;
+  sessions: ProfitSession[];
+}
+
+export interface CompareSession {
+  sessionId: string;
+  characterName: string;
+  huntLocation: string | null;
+  duration: number;
+  totalKills: number;
+  totalExperience: number;
+  totalLootValue: number;
+  xpPerHour: number;
+  killsPerHour: number;
+  lootPerHour: number;
+  startedAt: string;
+}
+
+export interface CompareData {
+  sessions: CompareSession[];
+}
+
+export interface GameEvent {
+  id: string;
+  type: "death" | "level_up" | "refill";
+  data: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+export interface SessionFilters {
+  page?: number;
+  limit?: number;
+  characterId?: string;
+  status?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

@@ -1,0 +1,31 @@
+services:
+  api:
+    build:
+      target: production
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  landing:
+    build:
+      target: production
+    restart: unless-stopped
+
+  app:
+    build:
+      target: production
+    restart: unless-stopped
+
+  backoffice:
+    build:
+      target: production
+    restart: unless-stopped
+
+  mysql:
+    restart: unless-stopped
+
+  redis:
+    restart: unless-stopped

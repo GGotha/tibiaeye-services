@@ -1,0 +1,4 @@
+- Usar fastify na API
+- A API deve seguir um padrão de use-cases e nao de services
+- Todos os projetos devem estar funcionando o build + lint
+- Configurar produtos na AcabatePay

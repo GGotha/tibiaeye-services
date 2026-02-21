@@ -1,0 +1,11 @@
+[install]
+# Use bun's default registry
+registry = "https://registry.npmjs.org"
+
+[install.lockfile]
+# Save lockfile
+save = true
+
+[run]
+# Silent by default
+silent = true

@@ -1,0 +1,47 @@
+# TibiaEye
+
+> Bot de Tibia com Dashboard em Tempo Real
+
+TibiaEye is a pixel bot for Tibia that automates hunting, looting, and navigation while allowing you to monitor everything in real-time through a modern dashboard.
+
+## What is a Pixel Bot?
+
+A pixel bot is automation that works by reading the game's screen pixels in real-time. Unlike memory bots, it:
+- Analyzes the screen image to identify monsters, items, HP, mana, etc.
+- Simulates mouse and keyboard inputs like a real player
+- Does not modify any game files
+- Requires the game window to be visible
+
+## Key Features
+
+### Bot Features
+- Intelligent pixel-based detection
+- Automatic targeting with whitelist/blacklist
+- Auto loot and refill management
+- Spell and healing automation
+
+### Dashboard Features
+- Real-time XP/h tracking
+- Live map position
+- Kill and loot analytics
+- Death and level-up alerts
+- Session history and comparisons
+
+## Requirements
+
+- Windows 10/11
+- Tibia client running and visible on screen
+- Recommended: Second monitor or dedicated VM
+
+## Pricing
+
+- Starter (Free): 1 character, 7 days history
+- Pro (R$29.90/month): 5 characters, 30 days history, live map
+- Enterprise (R$99.90/month): Unlimited characters, webhooks, SLA
+
+## Links
+
+- Website: https://tibiaeye.com
+- Dashboard: https://app.tibiaeye.com
+- Documentation: https://tibiaeye.com/docs
+- Discord: https://discord.gg/tibiaeye
