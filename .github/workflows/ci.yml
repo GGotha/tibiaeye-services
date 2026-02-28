@@ -43,5 +43,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:latest
             ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:${{ github.sha }}
+          build-args: |
+            VITE_API_URL=https://api.tibiaeye.com.br
           cache-from: type=gha
           cache-to: type=gha,mode=max
