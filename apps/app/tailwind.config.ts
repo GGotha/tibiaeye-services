@@ -45,6 +45,30 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      keyframes: {
+        "fade-in": {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(16px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        glow: {
+          "0%, 100%": { boxShadow: "0 0 8px 0 rgba(16, 185, 129, 0.2)" },
+          "50%": { boxShadow: "0 0 20px 4px rgba(16, 185, 129, 0.3)" },
+        },
+      },
+      animation: {
+        "fade-in": "fade-in 0.4s ease-out forwards",
+        "slide-up": "slide-up 0.5s ease-out forwards",
+        shimmer: "shimmer 2s ease-in-out infinite",
+        glow: "glow 2s ease-in-out infinite",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

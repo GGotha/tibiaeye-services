@@ -1,16 +1,23 @@
-import type { RouteWaypoint } from "@/types";
+import type { RouteSegmentAnalytics, RouteWaypoint } from "@/types";
 import { useState } from "react";
 import { WaypointMap } from "./waypoint-map";
 import { WaypointSidebar } from "./waypoint-sidebar";
+import { AnalyticsSidebar } from "./analytics-sidebar";
+
+type SidebarTab = "waypoints" | "analytics";
 
 interface RouteEditorProps {
   waypoints: RouteWaypoint[];
   onWaypointsChange: (waypoints: RouteWaypoint[]) => void;
+  routeId?: string;
+  segmentData?: RouteSegmentAnalytics;
 }
 
-export function RouteEditor({ waypoints, onWaypointsChange }: RouteEditorProps) {
+export function RouteEditor({ waypoints, onWaypointsChange, routeId, segmentData }: RouteEditorProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [currentFloor, setCurrentFloor] = useState(7);
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>("waypoints");
+  const [highlightedSegment, setHighlightedSegment] = useState<{ from: number; to: number } | null>(null);
 
   const addWaypoint = (x: number, y: number) => {
     const newWaypoint: RouteWaypoint = {
@@ -51,6 +58,12 @@ export function RouteEditor({ waypoints, onWaypointsChange }: RouteEditorProps) 
     if (selectedIndex === from) setSelectedIndex(to);
   };
 
+  const handleSegmentClick = (fromIndex: number, toIndex: number) => {
+    setHighlightedSegment({ from: fromIndex, to: toIndex });
+    // Pan to the segment start waypoint
+    setSelectedIndex(fromIndex);
+  };
+
   return (
     <div className="flex flex-1 overflow-hidden">
       <div className="flex-1">
@@ -64,16 +77,58 @@ export function RouteEditor({ waypoints, onWaypointsChange }: RouteEditorProps) 
           onMoveWaypoint={(index, x, y) =>
             updateWaypoint(index, { coordinate: [x, y, waypoints[index].coordinate?.[2] ?? currentFloor] })
           }
+          segmentData={segmentData}
+          highlightedSegment={highlightedSegment}
         />
       </div>
-      <WaypointSidebar
-        waypoints={waypoints}
-        selectedIndex={selectedIndex}
-        onSelect={setSelectedIndex}
-        onUpdate={updateWaypoint}
-        onDelete={deleteWaypoint}
-        onMove={moveWaypoint}
-      />
+
+      {/* Sidebar with tab toggle */}
+      <div className="flex w-80 flex-col border-l border-slate-800 bg-slate-950">
+        {/* Tab toggle header */}
+        <div className="flex border-b border-slate-800">
+          <button
+            type="button"
+            onClick={() => setSidebarTab("waypoints")}
+            className={`flex-1 px-3 py-2.5 text-xs font-semibold transition-colors ${
+              sidebarTab === "waypoints"
+                ? "border-b-2 border-emerald-500 text-white"
+                : "text-slate-500 hover:text-slate-300"
+            }`}
+          >
+            Waypoints ({waypoints.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setSidebarTab("analytics")}
+            className={`flex-1 px-3 py-2.5 text-xs font-semibold transition-colors ${
+              sidebarTab === "analytics"
+                ? "border-b-2 border-violet-500 text-white"
+                : "text-slate-500 hover:text-slate-300"
+            }`}
+          >
+            Analytics
+          </button>
+        </div>
+
+        {/* Tab content */}
+        {sidebarTab === "waypoints" ? (
+          <WaypointSidebar
+            waypoints={waypoints}
+            selectedIndex={selectedIndex}
+            onSelect={setSelectedIndex}
+            onUpdate={updateWaypoint}
+            onDelete={deleteWaypoint}
+            onMove={moveWaypoint}
+          />
+        ) : (
+          <AnalyticsSidebar
+            routeId={routeId}
+            segmentData={segmentData}
+            onSegmentClick={handleSegmentClick}
+            selectedSegment={highlightedSegment}
+          />
+        )}
+      </div>
     </div>
   );
 }

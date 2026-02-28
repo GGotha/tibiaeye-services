@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Area,
   CartesianGrid,
+  ComposedChart,
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -17,6 +18,14 @@ interface XPChartProps {
   }>;
   averageXpPerHour: number;
 }
+
+const tooltipStyle = {
+  background: "rgba(15, 23, 42, 0.85)",
+  backdropFilter: "blur(12px)",
+  border: "1px solid rgba(148, 163, 184, 0.1)",
+  borderRadius: "12px",
+  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+};
 
 export function XPChart({ data, averageXpPerHour }: XPChartProps) {
   const formatXp = (value: number) => {
@@ -34,24 +43,32 @@ export function XPChart({ data, averageXpPerHour }: XPChartProps) {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+          <ComposedChart data={data}>
+            <defs>
+              <linearGradient id="xpGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
             <XAxis
               dataKey="timestamp"
               tickFormatter={(v) => new Date(v).toLocaleTimeString()}
-              stroke="#64748b"
-              tick={{ fill: "#64748b" }}
+              stroke="#475569"
+              tick={{ fill: "#64748b", fontSize: 11 }}
             />
-            <YAxis tickFormatter={formatXp} stroke="#64748b" tick={{ fill: "#64748b" }} />
+            <YAxis tickFormatter={formatXp} stroke="#475569" tick={{ fill: "#64748b", fontSize: 11 }} />
             <Tooltip
               labelFormatter={(v) => new Date(v).toLocaleString()}
               formatter={(v: number) => [`${formatXp(v)} XP/h`, "XP/h"]}
-              contentStyle={{
-                background: "#0f172a",
-                border: "1px solid #334155",
-                borderRadius: "8px",
-              }}
+              contentStyle={tooltipStyle}
               labelStyle={{ color: "#94a3b8" }}
+            />
+            <Area
+              type="monotone"
+              dataKey="xpPerHour"
+              fill="url(#xpGradient)"
+              stroke="none"
             />
             <Line
               type="monotone"
@@ -59,9 +76,9 @@ export function XPChart({ data, averageXpPerHour }: XPChartProps) {
               stroke="#10b981"
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, fill: "#10b981" }}
+              activeDot={{ r: 5, fill: "#10b981", stroke: "#0f172a", strokeWidth: 2 }}
             />
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

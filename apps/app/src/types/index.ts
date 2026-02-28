@@ -280,6 +280,43 @@ export interface BotRoute {
   updatedAt: string;
 }
 
+// Route Analytics
+export interface RouteSegment {
+  fromIndex: number;
+  toIndex: number;
+  avgSeconds: number;
+  medianSeconds: number;
+  p95Seconds: number;
+  minSeconds: number;
+  maxSeconds: number;
+  sampleCount: number;
+  isSlow: boolean;
+  isHighVariance: boolean;
+}
+
+export interface RouteSegmentAnalytics {
+  segments: RouteSegment[];
+  totalAvgLoopSeconds: number;
+  sessionCount: number;
+  globalAvgSegmentSeconds: number;
+}
+
+export interface RouteSuggestion {
+  type: string;
+  segmentFrom: number;
+  segmentTo: number;
+  description: string;
+  estimatedSavingsSeconds: number;
+  priority: "high" | "medium" | "low";
+}
+
+export interface RouteSuggestions {
+  summary: string;
+  overallScore: number;
+  suggestions: RouteSuggestion[];
+  analyzedAt: string;
+}
+
 export interface SessionFilters {
   page?: number;
   limit?: number;
@@ -293,4 +330,133 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+// Bot Config types
+export interface HealingPotionConfig {
+  enabled?: boolean;
+  threshold?: number;
+  hotkey?: string;
+  cooldown?: number;
+}
+
+export interface HealingSpellConfig {
+  name?: string;
+  enabled?: boolean;
+  threshold?: number;
+  spell?: string;
+  hotkey?: string;
+  minMana?: number;
+}
+
+export interface FoodConfig {
+  enabled?: boolean;
+  threshold?: number;
+  hotkey?: string;
+  cooldown?: number;
+}
+
+export interface HealingConfig {
+  healthPotion?: HealingPotionConfig;
+  manaPotion?: HealingPotionConfig;
+  spells?: HealingSpellConfig[];
+  food?: FoodConfig;
+}
+
+export interface CavebotConfig {
+  routeFile?: string;
+  startWaypoint?: number;
+  loop?: boolean;
+}
+
+export interface RefillConfig {
+  city?: string;
+  hpPotionMin?: number;
+  mpPotionMin?: number;
+  capMin?: number;
+  checkCapacity?: boolean;
+  hpPotionTarget?: number;
+  mpPotionTarget?: number;
+  depositGold?: boolean;
+  depositLoot?: boolean;
+  dropFlasks?: boolean;
+  lootBackpack?: string;
+  mainBackpack?: string;
+  stashBackpack?: string;
+  depotChest?: number;
+  returnLabel?: string;
+}
+
+export interface GeneralConfig {
+  tickRate?: number;
+  enableHealing?: boolean;
+  enableCavebot?: boolean;
+  enableLoot?: boolean;
+  lootHotkey?: string;
+  stuckAlertTimeout?: number;
+  enableStuckAlert?: boolean;
+  enableLogging?: boolean;
+  window?: string;
+}
+
+export interface TargetingConfig {
+  enabled?: boolean;
+  mode?: "all" | "whitelist" | "blacklist";
+  whitelist?: string[];
+  blacklist?: string[];
+}
+
+export interface SpellAttackGroup {
+  name?: string;
+  enabled?: boolean;
+  spell?: string;
+  hotkey?: string;
+  minMana?: number;
+  cooldown?: number;
+}
+
+export interface SpellAttackConfig {
+  enabled?: boolean;
+  manaReservePercent?: number;
+  groups?: SpellAttackGroup[];
+}
+
+export interface ReconnectConfig {
+  enabled?: boolean;
+  email?: string;
+  password?: string;
+  maxRetries?: number;
+  delayBetweenRetries?: number;
+}
+
+export interface HardwareConfig {
+  mode?: "software" | "arduino";
+  arduinoPort?: string;
+  captureDevice?: number;
+}
+
+export interface ServerSaveConfig {
+  enabled?: boolean;
+  time?: string;
+  windowMinutes?: number;
+  waitAfterKickSeconds?: number;
+}
+
+export interface BotConfig {
+  healing?: HealingConfig;
+  cavebot?: CavebotConfig;
+  refill?: RefillConfig;
+  general?: GeneralConfig;
+  targeting?: TargetingConfig;
+  spellAttack?: SpellAttackConfig;
+  reconnect?: ReconnectConfig;
+  hardware?: HardwareConfig;
+  serverSave?: ServerSaveConfig;
+}
+
+export interface BotConfigResponse {
+  config: BotConfig;
+  version: number;
+  characterId: string;
+  updatedAt: string;
 }

@@ -64,6 +64,7 @@ export function useRealtimeSession(sessionId: string) {
   const [botStatus, setBotStatus] = useState<BotStatus | null>(null);
   const [lastEvent, setLastEvent] = useState<RealtimeEvent | null>(null);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [configAckVersion, setConfigAckVersion] = useState<number | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttemptRef = useRef(0);
@@ -98,29 +99,56 @@ export function useRealtimeSession(sessionId: string) {
 
         switch (data.type) {
           case "position":
-            setPosition({ x: data.x, y: data.y, z: data.z });
+            setPosition((prev) => {
+              if (prev && prev.x === data.x && prev.y === data.y && prev.z === data.z) return prev;
+              return { x: data.x, y: data.y, z: data.z };
+            });
             break;
           case "stats":
-            setStats({
-              totalKills: data.totalKills,
-              totalExperience: data.totalExperience,
-              totalLootValue: data.totalLootValue,
-              xpPerHour: data.xpPerHour,
+            setStats((prev) => {
+              if (
+                prev &&
+                prev.totalKills === data.totalKills &&
+                prev.totalExperience === data.totalExperience &&
+                prev.totalLootValue === data.totalLootValue &&
+                prev.xpPerHour === data.xpPerHour
+              ) return prev;
+              return {
+                totalKills: data.totalKills,
+                totalExperience: data.totalExperience,
+                totalLootValue: data.totalLootValue,
+                xpPerHour: data.xpPerHour,
+              };
             });
             break;
           case "status":
-            setBotStatus({
-              hpPercent: data.hpPercent,
-              manaPercent: data.manaPercent,
-              botState: data.botState,
-              targetCreature: data.targetCreature,
-              currentTask: data.currentTask,
-              experience: data.experience ?? null,
-              level: data.level ?? null,
-              speed: data.speed ?? null,
-              stamina: data.stamina ?? null,
-              capacity: data.capacity ?? null,
-              isStuck: data.isStuck ?? false,
+            setBotStatus((prev) => {
+              const hpPercent = data.hpPercent;
+              const manaPercent = data.manaPercent;
+              const botState = data.botState;
+              const targetCreature = data.targetCreature;
+              const currentTask = data.currentTask;
+              const experience = data.experience ?? null;
+              const level = data.level ?? null;
+              const speed = data.speed ?? null;
+              const stamina = data.stamina ?? null;
+              const capacity = data.capacity ?? null;
+              const isStuck = data.isStuck ?? false;
+              if (
+                prev &&
+                prev.hpPercent === hpPercent &&
+                prev.manaPercent === manaPercent &&
+                prev.botState === botState &&
+                prev.targetCreature === targetCreature &&
+                prev.currentTask === currentTask &&
+                prev.experience === experience &&
+                prev.level === level &&
+                prev.speed === speed &&
+                prev.stamina === stamina &&
+                prev.capacity === capacity &&
+                prev.isStuck === isStuck
+              ) return prev;
+              return { hpPercent, manaPercent, botState, targetCreature, currentTask, experience, level, speed, stamina, capacity, isStuck };
             });
             break;
           case "event":
@@ -139,6 +167,9 @@ export function useRealtimeSession(sessionId: string) {
               const next = [event, ...prev];
               return next.length > 100 ? next.slice(0, 100) : next;
             });
+            break;
+          case "config-ack":
+            setConfigAckVersion(data.version);
             break;
           case "session-ended":
             setBotStatus(null);
@@ -163,7 +194,7 @@ export function useRealtimeSession(sessionId: string) {
     };
   }, [connect]);
 
-  return { position, stats, botStatus, lastEvent, timelineEvents, isConnected };
+  return { position, stats, botStatus, lastEvent, timelineEvents, configAckVersion, isConnected };
 }
 
 export function useRealtimePosition(sessionId: string) {

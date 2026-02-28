@@ -11,39 +11,43 @@ export function BoostedCard() {
     <Card className="bg-slate-900/50 border-slate-800">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm text-slate-400 flex items-center gap-2">
-          <Zap className="h-4 w-4" />
+          <Zap className="h-4 w-4 text-yellow-400" />
           Boosted Today
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {isLoading ? (
           <div className="space-y-2">
-            <div className="h-6 w-32 animate-pulse bg-slate-800 rounded" />
-            <div className="h-6 w-32 animate-pulse bg-slate-800 rounded" />
+            <div className="h-10 w-full animate-pulse bg-slate-800 rounded-lg" />
+            <div className="h-10 w-full animate-pulse bg-slate-800 rounded-lg" />
           </div>
         ) : boosted ? (
           <>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
               <TibiaSprite
                 src={creatureSpriteUrl(boosted.boostedCreature.name)}
                 alt={boosted.boostedCreature.name}
                 size="sm"
               />
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-white">{boosted.boostedCreature.name}</p>
-                <p className="text-xs text-emerald-400">2x XP</p>
               </div>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400">
+                2x XP
+              </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-yellow-500/5 border border-yellow-500/10">
               <TibiaSprite
                 src={creatureSpriteUrl(boosted.boostedBoss.name)}
                 alt={boosted.boostedBoss.name}
                 size="sm"
               />
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-white">{boosted.boostedBoss.name}</p>
-                <p className="text-xs text-yellow-400">2x Loot (Boss)</p>
               </div>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400">
+                2x Loot
+              </span>
             </div>
           </>
         ) : (

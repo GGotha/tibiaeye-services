@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/auth-context";
-import { Navigate, Outlet } from "@tanstack/react-router";
+import { Navigate, Outlet, useLocation } from "@tanstack/react-router";
 import { useState } from "react";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
@@ -7,6 +7,7 @@ import { Sidebar } from "./sidebar";
 export function DashboardLayout() {
   const { isAuthenticated, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -21,11 +22,11 @@ export function DashboardLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-slate-950 bg-dot-pattern">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="md:ml-64">
         <Header onOpenSidebar={() => setSidebarOpen(true)} />
-        <main className="p-6">
+        <main key={location.pathname} className="p-6 animate-fade-in">
           <Outlet />
         </main>
       </div>

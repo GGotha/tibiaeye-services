@@ -7,12 +7,25 @@ import { useCharacter, useCharacterSessions } from "@/hooks/use-characters";
 import { useTibiaCharacter } from "@/hooks/use-tibia-data";
 import { creatureSpriteUrl, outfitSpriteUrl } from "@/lib/tibia-sprites";
 import { formatDate, formatNumber, getRelativeTime } from "@/lib/utils";
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, Award, Clock, Globe, Skull, Star, User } from "lucide-react";
+import { Link, Outlet, createFileRoute, useMatches } from "@tanstack/react-router";
+import { ArrowLeft, Award, Clock, Globe, Settings, Skull, Star, User } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/characters/$characterId")({
-  component: CharacterDetailPage,
+  component: CharacterDetailLayout,
 });
+
+function CharacterDetailLayout() {
+  const matches = useMatches();
+  const hasChildRoute = matches.some(
+    (m) => m.routeId === "/dashboard/characters/$characterId/config"
+  );
+
+  if (hasChildRoute) {
+    return <Outlet />;
+  }
+
+  return <CharacterDetailPage />;
+}
 
 function CharacterDetailPage() {
   const { characterId } = Route.useParams();
@@ -54,7 +67,7 @@ function CharacterDetailPage() {
           </Button>
         </Link>
         <TibiaSprite src={outfitSpriteUrl(vocation, sex)} alt={character.name} size="lg" />
-        <div>
+        <div className="flex-1">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-white">{character.name}</h1>
             {character.hasActiveSession && (
@@ -82,6 +95,15 @@ function CharacterDetailPage() {
             )}
           </div>
         </div>
+        <Link
+          to="/dashboard/characters/$characterId/config"
+          params={{ characterId }}
+        >
+          <Button variant="outline" className="border-slate-700 hover:border-emerald-500/50 transition-colors">
+            <Settings className="h-4 w-4 mr-2" />
+            Bot Config
+          </Button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

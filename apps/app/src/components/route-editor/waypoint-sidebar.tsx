@@ -133,14 +133,7 @@ export function WaypointSidebar({
   const selected = selectedIndex !== null ? waypoints[selectedIndex] : null;
 
   return (
-    <div className="flex w-80 flex-col border-l border-slate-800 bg-slate-950">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3">
-        <h2 className="text-sm font-semibold text-white">
-          Waypoints ({waypoints.length})
-        </h2>
-      </div>
-
+    <div className="flex flex-1 flex-col overflow-hidden">
       {/* Waypoint list */}
       <div ref={listRef} className="flex-1 overflow-y-auto">
         {waypoints.length === 0 ? (

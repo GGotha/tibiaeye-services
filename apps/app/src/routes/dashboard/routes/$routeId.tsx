@@ -1,9 +1,10 @@
 import { RouteEditor } from "@/components/route-editor/route-editor";
 import { useRoute, useUpdateRoute } from "@/hooks/use-routes";
+import { useRouteSegments } from "@/hooks/use-route-analytics";
 import { api } from "@/lib/api";
 import type { RouteWaypoint } from "@/types";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Download, Save } from "lucide-react";
+import { ArrowLeft, BarChart3, Download, Save } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/dashboard/routes/$routeId")({
@@ -15,6 +16,7 @@ function RouteEditorPage() {
   const { data: route, isLoading } = useRoute(routeId);
   const updateRoute = useUpdateRoute();
   const navigate = useNavigate();
+  const { data: segmentData } = useRouteSegments(routeId);
 
   const [name, setName] = useState("");
   const [waypoints, setWaypoints] = useState<RouteWaypoint[]>([]);
@@ -79,6 +81,12 @@ function RouteEditorPage() {
           {hasChanges && <span className="text-xs text-amber-400">unsaved</span>}
         </div>
         <div className="flex items-center gap-2">
+          {segmentData && segmentData.segments.length > 0 && (
+            <div className="flex items-center gap-1.5 rounded-lg bg-slate-800 px-3 py-1.5 text-xs text-slate-400">
+              <BarChart3 className="h-3.5 w-3.5" />
+              {segmentData.sessionCount} sessions analyzed
+            </div>
+          )}
           <button
             type="button"
             onClick={handleExport}
@@ -100,7 +108,12 @@ function RouteEditorPage() {
       </div>
 
       {/* Editor */}
-      <RouteEditor waypoints={waypoints} onWaypointsChange={handleWaypointsChange} />
+      <RouteEditor
+        waypoints={waypoints}
+        onWaypointsChange={handleWaypointsChange}
+        routeId={routeId}
+        segmentData={segmentData}
+      />
     </div>
   );
 }

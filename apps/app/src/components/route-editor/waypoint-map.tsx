@@ -1,4 +1,4 @@
-import type { RouteWaypoint } from "@/types";
+import type { RouteSegmentAnalytics, RouteWaypoint } from "@/types";
 import L from "leaflet";
 import { useCallback, useEffect, useRef } from "react";
 import "leaflet/dist/leaflet.css";
@@ -117,6 +117,18 @@ function createWaypointIcon(index: number, type: string, isSelected: boolean): L
   });
 }
 
+function getSegmentColor(avgSeconds: number, globalAvg: number): string {
+  if (avgSeconds < globalAvg) return "#10b981"; // green
+  if (avgSeconds < globalAvg * 2) return "#f59e0b"; // amber
+  return "#ef4444"; // red
+}
+
+function getSegmentWeight(avgSeconds: number, globalAvg: number): number {
+  if (avgSeconds < globalAvg) return 2;
+  if (avgSeconds < globalAvg * 2) return 3;
+  return 4;
+}
+
 interface WaypointMapProps {
   waypoints: RouteWaypoint[];
   selectedIndex: number | null;
@@ -125,6 +137,8 @@ interface WaypointMapProps {
   onMapClick: (x: number, y: number) => void;
   onSelectWaypoint: (index: number) => void;
   onMoveWaypoint: (index: number, x: number, y: number) => void;
+  segmentData?: RouteSegmentAnalytics;
+  highlightedSegment?: { from: number; to: number } | null;
 }
 
 export function WaypointMap({
@@ -135,12 +149,14 @@ export function WaypointMap({
   onMapClick,
   onSelectWaypoint,
   onMoveWaypoint,
+  segmentData,
+  highlightedSegment,
 }: WaypointMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.GridLayer | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
-  const polylineRef = useRef<L.Polyline | null>(null);
+  const polylinesRef = useRef<L.Polyline[]>([]);
 
   // Keep latest onMapClick in a ref so the Leaflet click handler always uses the current callback
   const onMapClickRef = useRef(onMapClick);
@@ -196,7 +212,24 @@ export function WaypointMap({
     tileLayerRef.current = newLayer;
   }, [currentFloor]);
 
-  // Update markers and polyline
+  // Build segment lookup for quick access
+  const segmentLookup = useRef(new Map<string, { avgSeconds: number; p95Seconds: number; sampleCount: number; isSlow: boolean }>());
+  useEffect(() => {
+    const map = new Map<string, { avgSeconds: number; p95Seconds: number; sampleCount: number; isSlow: boolean }>();
+    if (segmentData) {
+      for (const seg of segmentData.segments) {
+        map.set(`${seg.fromIndex}->${seg.toIndex}`, {
+          avgSeconds: seg.avgSeconds,
+          p95Seconds: seg.p95Seconds,
+          sampleCount: seg.sampleCount,
+          isSlow: seg.isSlow,
+        });
+      }
+    }
+    segmentLookup.current = map;
+  }, [segmentData]);
+
+  // Update markers and polylines
   const updateMarkers = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -207,10 +240,10 @@ export function WaypointMap({
     }
     markersRef.current = [];
 
-    if (polylineRef.current) {
-      map.removeLayer(polylineRef.current);
-      polylineRef.current = null;
+    for (const p of polylinesRef.current) {
+      map.removeLayer(p);
     }
+    polylinesRef.current = [];
 
     // Filter waypoints on current floor
     const floorWaypoints = waypoints
@@ -218,13 +251,10 @@ export function WaypointMap({
       .filter(({ wp }) => wp.coordinate && wp.coordinate[2] === currentFloor);
 
     // Add markers
-    const polylinePoints: L.LatLng[] = [];
-
     for (const { wp, originalIndex } of floorWaypoints) {
       if (!wp.coordinate) continue;
 
       const latlng = tibiaToLatLng(map, wp.coordinate[0], wp.coordinate[1]);
-      polylinePoints.push(latlng);
 
       const icon = createWaypointIcon(originalIndex, wp.type, originalIndex === selectedIndex);
       const marker = L.marker(latlng, {
@@ -257,16 +287,63 @@ export function WaypointMap({
       markersRef.current.push(marker);
     }
 
-    // Draw polyline connecting waypoints
-    if (polylinePoints.length > 1) {
-      polylineRef.current = L.polyline(polylinePoints, {
-        color: "#10b981",
-        weight: 2,
-        opacity: 0.6,
-        dashArray: "5, 8",
-      }).addTo(map);
+    // Draw polylines between consecutive waypoints
+    const globalAvg = segmentData?.globalAvgSegmentSeconds ?? 0;
+    const hasSegmentData = segmentData && segmentData.segments.length > 0;
+
+    for (let i = 0; i < floorWaypoints.length - 1; i++) {
+      const from = floorWaypoints[i];
+      const to = floorWaypoints[i + 1];
+      if (!from.wp.coordinate || !to.wp.coordinate) continue;
+
+      const fromLatLng = tibiaToLatLng(map, from.wp.coordinate[0], from.wp.coordinate[1]);
+      const toLatLng = tibiaToLatLng(map, to.wp.coordinate[0], to.wp.coordinate[1]);
+
+      const segKey = `${from.originalIndex}->${to.originalIndex}`;
+      const segInfo = segmentLookup.current.get(segKey);
+
+      // Check if this segment is highlighted
+      const isHighlighted =
+        highlightedSegment?.from === from.originalIndex &&
+        highlightedSegment?.to === to.originalIndex;
+
+      let color = "#10b981";
+      let weight = 2;
+      let opacity = 0.6;
+      let dashArray: string | undefined = "5, 8";
+
+      if (hasSegmentData && segInfo) {
+        color = getSegmentColor(segInfo.avgSeconds, globalAvg);
+        weight = getSegmentWeight(segInfo.avgSeconds, globalAvg);
+        opacity = 0.8;
+        dashArray = undefined;
+      }
+
+      if (isHighlighted) {
+        weight = 5;
+        opacity = 1;
+        color = "#8b5cf6"; // violet for highlighted
+      }
+
+      const polyline = L.polyline([fromLatLng, toLatLng], {
+        color,
+        weight,
+        opacity,
+        dashArray,
+      });
+
+      // Add tooltip with timing info
+      if (segInfo) {
+        polyline.bindTooltip(
+          `WP ${from.originalIndex} → ${to.originalIndex}: avg ${segInfo.avgSeconds.toFixed(1)}s (${segInfo.sampleCount} runs)`,
+          { sticky: true, className: "bg-slate-900 text-white border-slate-700 text-xs px-2 py-1 rounded" }
+        );
+      }
+
+      polyline.addTo(map);
+      polylinesRef.current.push(polyline);
     }
-  }, [waypoints, selectedIndex, currentFloor, onSelectWaypoint, onMoveWaypoint]);
+  }, [waypoints, selectedIndex, currentFloor, onSelectWaypoint, onMoveWaypoint, segmentData, highlightedSegment]);
 
   useEffect(() => {
     updateMarkers();
@@ -315,6 +392,29 @@ export function WaypointMap({
       <div className="absolute top-4 left-4 z-[1000] rounded-lg border border-slate-700 bg-slate-900/90 px-3 py-1.5 text-sm text-slate-300 backdrop-blur-sm">
         {waypoints.filter((w) => w.coordinate?.[2] === currentFloor).length} waypoints on floor {floorLabel}
       </div>
+
+      {/* Segment legend (when analytics data is present) */}
+      {segmentData && segmentData.segments.length > 0 && (
+        <div className="absolute top-4 right-4 z-[1000] rounded-lg border border-slate-700 bg-slate-900/90 px-3 py-2 backdrop-blur-sm">
+          <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-slate-500">
+            Segment Speed
+          </div>
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2 text-xs text-slate-300">
+              <div className="h-0.5 w-4 rounded bg-emerald-500" />
+              Fast
+            </div>
+            <div className="flex items-center gap-2 text-xs text-slate-300">
+              <div className="h-0.5 w-4 rounded bg-amber-500" />
+              Medium
+            </div>
+            <div className="flex items-center gap-2 text-xs text-slate-300">
+              <div className="h-0.5 w-4 rounded bg-red-500" />
+              Slow
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Click hint */}
       <div className="absolute bottom-4 right-4 z-[1000] rounded-lg border border-slate-700 bg-slate-900/90 px-3 py-1.5 text-xs text-slate-400 backdrop-blur-sm">

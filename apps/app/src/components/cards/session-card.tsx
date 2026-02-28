@@ -6,6 +6,12 @@ import type { Session } from "@/types";
 import { Link } from "@tanstack/react-router";
 import { Activity, Clock, Coins, Sword } from "lucide-react";
 
+const statusColors = {
+  active: { strip: "from-emerald-500 to-emerald-400", badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  completed: { strip: "from-blue-500 to-blue-400", badge: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+  crashed: { strip: "from-red-500 to-red-400", badge: "bg-red-500/10 text-red-400 border-red-500/20" },
+};
+
 interface SessionCardProps {
   session: Session;
 }
@@ -20,23 +26,19 @@ export function SessionCard({ session }: SessionCardProps) {
       : Math.round((Date.now() - new Date(session.startedAt).getTime()) / 1000)
   );
 
+  const status = statusColors[session.status as keyof typeof statusColors] || statusColors.completed;
+
   return (
     <Link to="/dashboard/sessions/$sessionId" params={{ sessionId: session.id }}>
-      <Card className="bg-slate-900/50 border-slate-800 hover:border-slate-700 transition-colors cursor-pointer">
+      <Card className="bg-slate-900/50 border-slate-800 hover:border-slate-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 cursor-pointer overflow-hidden">
+        <div className={cn("h-1 bg-gradient-to-r", status.strip)} />
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-semibold text-white">{session.characterName}</h3>
               <p className="text-sm text-slate-400">{session.huntLocation || "Unknown location"}</p>
             </div>
-            <Badge
-              className={cn(
-                session.status === "active" &&
-                  "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-                session.status === "completed" && "bg-blue-500/10 text-blue-400 border-blue-500/20",
-                session.status === "crashed" && "bg-red-500/10 text-red-400 border-red-500/20"
-              )}
-            >
+            <Badge className={status.badge}>
               {session.status}
             </Badge>
           </div>
@@ -44,7 +46,7 @@ export function SessionCard({ session }: SessionCardProps) {
         <CardContent>
           <div className="grid grid-cols-4 gap-4">
             <div className="text-center">
-              <Clock className="h-4 w-4 text-slate-400 mx-auto mb-1" />
+              <Clock className="h-4 w-4 text-cyan-400 mx-auto mb-1" />
               <p className="text-sm font-medium text-white">{formatDuration(duration)}</p>
             </div>
             <div className="text-center">

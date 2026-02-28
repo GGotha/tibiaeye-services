@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { ImageOff } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const SIZE_MAP = {
   sm: "h-6 w-6",
@@ -14,6 +14,9 @@ const SIZE_PX = {
   lg: 64,
 } as const;
 
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 2000;
+
 interface TibiaSpriteProps {
   src: string;
   alt: string;
@@ -22,9 +25,31 @@ interface TibiaSpriteProps {
 }
 
 export function TibiaSprite({ src, alt, size = "md", className }: TibiaSpriteProps) {
-  const [hasError, setHasError] = useState(false);
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
+  const retriesRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  if (hasError) {
+  useEffect(() => {
+    setStatus("loading");
+    retriesRef.current = 0;
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [src]);
+
+  const handleError = useCallback(() => {
+    if (retriesRef.current < MAX_RETRIES) {
+      retriesRef.current += 1;
+      setStatus("loading");
+      timerRef.current = setTimeout(() => {
+        setStatus((prev) => (prev === "loading" ? "loading" : prev));
+      }, RETRY_DELAY_MS);
+      return;
+    }
+    setStatus("error");
+  }, []);
+
+  if (status === "error") {
     return (
       <div
         className={cn(
@@ -38,15 +63,32 @@ export function TibiaSprite({ src, alt, size = "md", className }: TibiaSpritePro
     );
   }
 
+  const separator = src.includes("?") ? "&" : "?";
+  const imgSrc = retriesRef.current > 0 ? `${src}${separator}_r=${retriesRef.current}` : src;
+
   return (
-    <img
-      src={src}
-      alt={alt}
-      width={SIZE_PX[size]}
-      height={SIZE_PX[size]}
-      loading="lazy"
-      onError={() => setHasError(true)}
-      className={cn(SIZE_MAP[size], "object-contain [image-rendering:pixelated]", className)}
-    />
+    <div className={cn("relative", SIZE_MAP[size], className)}>
+      {status === "loading" && (
+        <div
+          className={cn(
+            "absolute inset-0 rounded bg-slate-800/50 animate-pulse",
+          )}
+        />
+      )}
+      <img
+        src={imgSrc}
+        alt={alt}
+        width={SIZE_PX[size]}
+        height={SIZE_PX[size]}
+        loading="lazy"
+        onLoad={() => setStatus("loaded")}
+        onError={handleError}
+        className={cn(
+          SIZE_MAP[size],
+          "object-contain [image-rendering:pixelated]",
+          status === "loading" && "opacity-0",
+        )}
+      />
+    </div>
   );
 }

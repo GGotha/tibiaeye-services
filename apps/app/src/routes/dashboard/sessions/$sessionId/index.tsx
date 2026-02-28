@@ -32,11 +32,21 @@ import { useSessionPositions } from "@/hooks/use-positions";
 import { useRealtimeSession } from "@/hooks/use-realtime";
 import { useSession } from "@/hooks/use-sessions";
 import { itemSpriteUrl } from "@/lib/tibia-sprites";
-import { cn, formatDateTime, formatDuration, formatNumber } from "@/lib/utils";
+import { cn, formatDateTime, formatDuration, formatNumber, getRelativeTime } from "@/lib/utils";
 import type { TimelineEvent } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { Activity, AlertTriangle, ArrowLeft, Clock, Coins, DollarSign, Skull, Sword, Zap } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowLeft,
+  Clock,
+  Coins,
+  DollarSign,
+  Skull,
+  Sword,
+  Zap,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export const Route = createFileRoute("/dashboard/sessions/$sessionId/")({
@@ -71,16 +81,17 @@ function SessionDetailPage() {
   );
 
   const queryClient = useQueryClient();
-  const prevStatsRef = useRef(stats);
+  const prevStatsValuesRef = useRef<string>("");
 
   useEffect(() => {
-    if (stats && stats !== prevStatsRef.current) {
-      prevStatsRef.current = stats;
-      queryClient.invalidateQueries({ queryKey: ["session", sessionId] });
-      queryClient.invalidateQueries({ queryKey: ["experience-hourly", sessionId] });
-      queryClient.invalidateQueries({ queryKey: ["kills-by-creature", sessionId] });
-      queryClient.invalidateQueries({ queryKey: ["loot-summary", sessionId] });
-    }
+    if (!stats) return;
+    const key = `${stats.totalKills}:${stats.totalExperience}:${stats.totalLootValue}:${stats.xpPerHour}`;
+    if (key === prevStatsValuesRef.current) return;
+    prevStatsValuesRef.current = key;
+    queryClient.invalidateQueries({ queryKey: ["session", sessionId] });
+    queryClient.invalidateQueries({ queryKey: ["experience-hourly", sessionId] });
+    queryClient.invalidateQueries({ queryKey: ["kills-by-creature", sessionId] });
+    queryClient.invalidateQueries({ queryKey: ["loot-summary", sessionId] });
   }, [stats, sessionId, queryClient]);
 
   const isActive = session?.status === "active";
@@ -105,6 +116,25 @@ function SessionDetailPage() {
 
   const { data: pathData } = useSessionPositions(sessionId, isCompleted);
   const { data: visitHeatmapData } = usePositionHeatmap(sessionId, heatmapStartDate);
+
+  // Collect warning/error events from persisted + real-time, dedup, sorted newest first
+  const warningEvents = useMemo(() => {
+    const persisted: TimelineEvent[] = (gameEvents ?? [])
+      .filter((e) => e.type === "warning")
+      .map((e) => ({ type: e.type, timestamp: e.createdAt, data: e.data }));
+    const realtime = timelineEvents.filter((e) => e.type === "warning");
+    const all = [...realtime, ...persisted];
+    const seen = new Set<string>();
+    const deduped: TimelineEvent[] = [];
+    for (const event of all) {
+      const key = `warning:${event.timestamp}:${String(event.data?.message ?? "")}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      deduped.push(event);
+    }
+    deduped.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return deduped;
+  }, [gameEvents, timelineEvents]);
 
   // Merge real-time events with initial data, dedup by type+timestamp, limit to 10
   const mergedTimeline = useMemo(() => {
@@ -248,7 +278,11 @@ function SessionDetailPage() {
               <div>
                 <p className="text-sm text-slate-400">Kills/Hour</p>
                 <p className="text-2xl font-bold text-white">
-                  {duration > 0 ? formatNumber(Math.round((stats?.totalKills ?? session.totalKills) / (duration / 3600))) : "--"}
+                  {duration > 0
+                    ? formatNumber(
+                        Math.round((stats?.totalKills ?? session.totalKills) / (duration / 3600))
+                      )
+                    : "--"}
                 </p>
               </div>
             </div>
@@ -261,7 +295,13 @@ function SessionDetailPage() {
               <div>
                 <p className="text-sm text-slate-400">Loot/Hour</p>
                 <p className="text-2xl font-bold text-white">
-                  {duration > 0 ? formatNumber(Math.round((stats?.totalLootValue ?? session.totalLootValue) / (duration / 3600))) : "--"}
+                  {duration > 0
+                    ? formatNumber(
+                        Math.round(
+                          (stats?.totalLootValue ?? session.totalLootValue) / (duration / 3600)
+                        )
+                      )
+                    : "--"}
                 </p>
               </div>
             </div>
@@ -280,16 +320,52 @@ function SessionDetailPage() {
             </div>
           </CardContent>
         </Card>
+        <Card
+          className={cn(
+            "bg-slate-900/50 border-slate-800",
+            warningEvents.length > 0 && "border-amber-500/30"
+          )}
+        >
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <AlertTriangle
+                className={cn(
+                  "h-8 w-8",
+                  warningEvents.some((e) => e.data?.level === "error")
+                    ? "text-red-400"
+                    : "text-amber-400"
+                )}
+              />
+              <div>
+                <p className="text-sm text-slate-400">Alerts</p>
+                <p
+                  className={cn(
+                    "text-2xl font-bold",
+                    warningEvents.length > 0
+                      ? warningEvents.some((e) => e.data?.level === "error")
+                        ? "text-red-400"
+                        : "text-amber-400"
+                      : "text-white"
+                  )}
+                >
+                  {warningEvents.length}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         <Card className="bg-slate-900/50 border-slate-800">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <DollarSign className="h-8 w-8 text-green-400" />
               <div>
                 <p className="text-sm text-slate-400">Net Profit</p>
-                <p className={cn(
-                  "text-2xl font-bold",
-                  profitData && profitData.netProfit >= 0 ? "text-green-400" : "text-red-400"
-                )}>
+                <p
+                  className={cn(
+                    "text-2xl font-bold",
+                    profitData && profitData.netProfit >= 0 ? "text-green-400" : "text-red-400"
+                  )}
+                >
                   {profitData ? formatNumber(profitData.netProfit) : "--"}
                 </p>
               </div>
@@ -302,10 +378,12 @@ function SessionDetailPage() {
               <DollarSign className="h-8 w-8 text-cyan-400" />
               <div>
                 <p className="text-sm text-slate-400">Profit/Hour</p>
-                <p className={cn(
-                  "text-2xl font-bold",
-                  profitData && profitData.profitPerHour >= 0 ? "text-green-400" : "text-red-400"
-                )}>
+                <p
+                  className={cn(
+                    "text-2xl font-bold",
+                    profitData && profitData.profitPerHour >= 0 ? "text-green-400" : "text-red-400"
+                  )}
+                >
                   {profitData ? formatNumber(Math.round(profitData.profitPerHour)) : "--"}
                 </p>
               </div>
@@ -324,6 +402,37 @@ function SessionDetailPage() {
               attempted.
             </p>
           </div>
+        </div>
+      )}
+
+      {warningEvents.length > 0 && (
+        <div className="space-y-2">
+          {warningEvents.slice(0, 5).map((event, index) => {
+            const isError = event.data?.level === "error";
+            return (
+              <div
+                key={`alert-${event.timestamp}-${index}`}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg border px-4 py-3",
+                  isError
+                    ? "border-red-500/30 bg-red-500/10"
+                    : "border-amber-500/30 bg-amber-500/10"
+                )}
+              >
+                <AlertTriangle
+                  className={cn("h-5 w-5 shrink-0", isError ? "text-red-400" : "text-amber-400")}
+                />
+                <div className="flex-1 min-w-0">
+                  <p className={cn("font-medium", isError ? "text-red-300" : "text-amber-300")}>
+                    {String(event.data?.message ?? "Unknown warning")}
+                  </p>
+                </div>
+                <span className="text-xs text-slate-500 whitespace-nowrap">
+                  {getRelativeTime(event.timestamp)}
+                </span>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -354,7 +463,7 @@ function SessionDetailPage() {
         <LiveMap
           position={null}
           isConnected={false}
-          heatmapData={heatmapData}
+          // heatmapData={heatmapData}
           pathData={pathData}
           visitHeatmapData={visitHeatmapData}
           heatmapTimeRange={heatmapTimeRange}
@@ -373,6 +482,21 @@ function SessionDetailPage() {
         <TabsList className="bg-slate-800">
           <TabsTrigger value="kills">Kills</TabsTrigger>
           <TabsTrigger value="loot">Loot</TabsTrigger>
+          <TabsTrigger value="alerts" className="gap-1.5">
+            Alerts
+            {warningEvents.length > 0 && (
+              <span
+                className={cn(
+                  "ml-1 inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-medium leading-none",
+                  warningEvents.some((e) => e.data?.level === "error")
+                    ? "bg-red-500/20 text-red-400"
+                    : "bg-amber-500/20 text-amber-400"
+                )}
+              >
+                {warningEvents.length}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
         </TabsList>
 
@@ -434,6 +558,57 @@ function SessionDetailPage() {
             </div>
           ) : (
             <div className="text-center py-8 text-slate-400">No loot recorded in this session.</div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="alerts" className="mt-4">
+          {warningEvents.length > 0 ? (
+            <div className="rounded-lg border border-slate-800 bg-slate-900/50">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-slate-800 hover:bg-transparent">
+                    <TableHead className="text-slate-400 w-24">Level</TableHead>
+                    <TableHead className="text-slate-400">Message</TableHead>
+                    <TableHead className="text-slate-400 text-right w-40">Time</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {warningEvents.map((event, index) => {
+                    const isError = event.data?.level === "error";
+                    return (
+                      <TableRow
+                        key={`alert-row-${event.timestamp}-${index}`}
+                        className="border-slate-800 hover:bg-slate-800/50"
+                      >
+                        <TableCell>
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium",
+                              isError
+                                ? "bg-red-500/10 text-red-400"
+                                : "bg-amber-500/10 text-amber-400"
+                            )}
+                          >
+                            <AlertTriangle className="h-3 w-3" />
+                            {isError ? "Error" : "Warning"}
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-medium text-white">
+                          {String(event.data?.message ?? "Unknown warning")}
+                        </TableCell>
+                        <TableCell className="text-right text-slate-400 text-sm">
+                          {getRelativeTime(event.timestamp)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-slate-400">
+              No alerts recorded in this session.
+            </div>
           )}
         </TabsContent>
 

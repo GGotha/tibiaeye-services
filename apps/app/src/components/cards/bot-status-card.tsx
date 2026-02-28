@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TibiaSprite } from "@/components/ui/tibia-sprite";
 import { creatureSpriteUrl } from "@/lib/tibia-sprites";
 import { cn } from "@/lib/utils";
-import { Clock, Cog, Crosshair, Droplets, Gauge, Heart, Weight } from "lucide-react";
+import { Clock, Cog, Crosshair, Droplets, Gauge, Heart, Monitor, Weight } from "lucide-react";
 
 function formatStamina(minutes: number | null): string {
   if (minutes == null) return "--";
@@ -33,6 +33,12 @@ export function BotStatusCard({
   return (
     <Card className="bg-slate-900/50 border-slate-800">
       <CardContent className="p-6 space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-slate-800">
+          <Monitor className="h-4 w-4 text-emerald-400" />
+          <h3 className="text-sm font-semibold text-white">Bot Status</h3>
+          <span className="ml-auto h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+        </div>
+
         <div className="space-y-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
@@ -41,11 +47,15 @@ export function BotStatusCard({
             </div>
             <span className="text-xs font-medium text-white">{hpPercent}%</span>
           </div>
-          <div className="h-2 rounded-full bg-slate-800">
+          <div className="h-2.5 rounded-full bg-slate-800 overflow-hidden">
             <div
               className={cn(
-                "h-full rounded-full transition-all duration-500",
-                hpPercent > 50 ? "bg-red-500" : hpPercent > 25 ? "bg-orange-500" : "bg-red-600"
+                "h-full rounded-full transition-all duration-500 progress-shimmer",
+                hpPercent > 50
+                  ? "bg-gradient-to-r from-green-500 to-emerald-400"
+                  : hpPercent > 25
+                    ? "bg-gradient-to-r from-orange-500 to-yellow-500"
+                    : "bg-gradient-to-r from-red-600 to-red-500 animate-bar-pulse",
               )}
               style={{ width: `${Math.min(100, Math.max(0, hpPercent))}%` }}
             />
@@ -60,9 +70,9 @@ export function BotStatusCard({
             </div>
             <span className="text-xs font-medium text-white">{manaPercent}%</span>
           </div>
-          <div className="h-2 rounded-full bg-slate-800">
+          <div className="h-2.5 rounded-full bg-slate-800 overflow-hidden">
             <div
-              className="h-full rounded-full bg-blue-500 transition-all duration-500"
+              className="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-500 progress-shimmer"
               style={{ width: `${Math.min(100, Math.max(0, manaPercent))}%` }}
             />
           </div>
@@ -79,7 +89,7 @@ export function BotStatusCard({
           )}
           {currentTask && (
             <div className="flex items-center gap-2 text-sm">
-              <Cog className="h-3.5 w-3.5 text-slate-400" />
+              <Cog className="h-3.5 w-3.5 text-slate-400 animate-spin" style={{ animationDuration: "3s" }} />
               <span className="text-slate-400">Task:</span>
               <span className="text-white">{currentTask}</span>
             </div>

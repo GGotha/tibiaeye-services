@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { experienceForLevel } from "@/lib/tibia";
 import { formatNumber } from "@/lib/utils";
-import { TrendingUp } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 function formatTimeToLevel(hours: number): string {
   if (hours < 1) {
@@ -35,21 +35,23 @@ export function NextLevelCard({ experience, level, xpPerHour }: NextLevelCardPro
     <Card className="bg-slate-900/50 border-slate-800">
       <CardContent className="pt-6">
         <div className="flex items-center gap-3">
-          <TrendingUp className="h-8 w-8 text-purple-400" />
+          <div className="rounded-lg p-2 bg-purple-400/10">
+            <Sparkles className="h-7 w-7 text-purple-400" />
+          </div>
           <div className="flex-1">
             <p className="text-sm text-slate-400">Next Level</p>
             <p className="text-2xl font-bold text-white">
               {hasData && xpPerHour > 0 ? formatTimeToLevel(timeHours) : "--"}
             </p>
             {hasData && (
-              <div className="mt-1">
+              <div className="mt-2">
                 <div className="flex justify-between text-xs text-slate-500">
                   <span>Lv {level}</span>
                   <span>{progressPercent}%</span>
                 </div>
-                <div className="mt-0.5 h-1 bg-slate-800 rounded-full overflow-hidden">
+                <div className="mt-0.5 h-2 bg-slate-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-purple-500 rounded-full transition-all duration-1000"
+                    className="h-full bg-gradient-to-r from-purple-600 to-fuchsia-500 rounded-full transition-all duration-1000 progress-shimmer"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>

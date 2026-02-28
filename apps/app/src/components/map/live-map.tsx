@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import L from "leaflet";
 import { Crosshair } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 
 interface Position {
@@ -154,18 +154,6 @@ function createCharacterIcon(): L.DivIcon {
   });
 }
 
-function createReplayIcon(): L.DivIcon {
-  return L.divIcon({
-    className: "",
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-    html: `
-      <div style="position:relative;width:20px;height:20px;">
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#60a5fa;border:2px solid #3b82f6;box-shadow:0 0 8px 2px rgba(59,130,246,0.6);"></div>
-      </div>
-    `,
-  });
-}
 
 function tibiaToLatLng(map: L.Map, x: number, y: number): L.LatLng {
   return map.unproject([x, y], 0);
@@ -176,7 +164,7 @@ function formatTimestamp(iso: string): string {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-export function LiveMap({
+export const LiveMap = memo(function LiveMap({
   position,
   isConnected,
   heatmapData,
@@ -324,12 +312,13 @@ export function LiveMap({
         map.flyTo(latLng, DEFAULT_ZOOM, { animate: true, duration: 0.8 });
         hasZoomedRef.current = true;
       } else {
-        map.flyTo(latLng, map.getZoom(), { animate: true, duration: 0.5 });
+        map.panTo(latLng, { animate: true, duration: 0.3 });
       }
     }
   }, [position, currentFloor, autoFollow, floorOverride]);
 
-  // Render replay trail and initial view (replay mode)
+  // Enter replay mode: clean up live markers and set initial view
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mode/data change, not floor
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !isReplayMode) return;
@@ -345,27 +334,14 @@ export function LiveMap({
       trailPointsRef.current = [];
     }
 
-    // Draw full trail polyline
-    const floorPoints = pathData.filter((p) => p.z === currentFloor);
-    const latLngs = floorPoints.map((p) => tibiaToLatLng(map, p.x, p.y));
-
-    if (replayTrailRef.current) {
-      map.removeLayer(replayTrailRef.current);
-    }
-    replayTrailRef.current = L.polyline(latLngs, {
-      color: "#10b981",
-      weight: 2,
-      opacity: 0.3,
-    }).addTo(map);
-
-    // Initial pan to first point (preserve current zoom level)
+    // Initial view — jump to first point without animation (avoids heavy repaint)
     if (!hasZoomedRef.current && pathData.length > 0) {
       const first = pathData[0];
       setCurrentFloor(first.z);
       const firstLatLng = tibiaToLatLng(map, first.x, first.y);
       const currentZoom = map.getZoom();
       const zoom = currentZoom > 0 ? currentZoom : DEFAULT_ZOOM;
-      map.flyTo(firstLatLng, zoom, { animate: true, duration: 0.8 });
+      map.setView(firstLatLng, zoom, { animate: false });
       hasZoomedRef.current = true;
     }
 
@@ -375,39 +351,58 @@ export function LiveMap({
         replayTrailRef.current = null;
       }
     };
-  }, [isReplayMode, pathData, currentFloor]);
+  }, [isReplayMode, pathData]);
 
-  // Update replay marker position
+  // Update replay trail polyline and marker position
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !isReplayMode || pathData.length === 0) return;
+    if (!map || !isReplayMode || !pathData?.length) return;
 
-    const point = pathData[replayIndex];
-    if (!point) return;
-
-    // Auto-switch floor
-    if (point.z !== currentFloor) {
-      setCurrentFloor(point.z);
+    // Deduplicate consecutive same-position points for performance
+    const floorPoints = pathData.filter((p) => p.z === currentFloor);
+    const simplified: L.LatLng[] = [];
+    let prevX = -1;
+    let prevY = -1;
+    for (const p of floorPoints) {
+      if (p.x === prevX && p.y === prevY) continue;
+      simplified.push(tibiaToLatLng(map, p.x, p.y));
+      prevX = p.x;
+      prevY = p.y;
     }
 
-    const latLng = tibiaToLatLng(map, point.x, point.y);
-
-    if (replayMarkerRef.current) {
-      replayMarkerRef.current.setLatLng(latLng);
+    if (replayTrailRef.current) {
+      replayTrailRef.current.setLatLngs(simplified);
     } else {
-      replayMarkerRef.current = L.marker(latLng, {
-        icon: createReplayIcon(),
-        zIndexOffset: 1000,
+      replayTrailRef.current = L.polyline(simplified, {
+        color: "#10b981",
+        weight: 2,
+        opacity: 0.3,
+        smoothFactor: 2,
       }).addTo(map);
     }
 
-    if (autoFollow) {
-      map.panTo(latLng, { animate: true, duration: 0.3 });
-    }
+    // Place marker at current replay position
+    const point = pathData[replayIndex];
+    if (point) {
+      if (point.z !== currentFloor) {
+        setCurrentFloor(point.z);
+      }
 
-    return () => {
-      // Cleanup only on unmount, not on every index change
-    };
+      const latLng = tibiaToLatLng(map, point.x, point.y);
+
+      if (replayMarkerRef.current) {
+        replayMarkerRef.current.setLatLng(latLng);
+      } else {
+        replayMarkerRef.current = L.marker(latLng, {
+          icon: createCharacterIcon(),
+          zIndexOffset: 1000,
+        }).addTo(map);
+      }
+
+      if (autoFollow) {
+        map.panTo(latLng, { animate: true, duration: 0.3 });
+      }
+    }
   }, [replayIndex, isReplayMode, pathData, autoFollow, currentFloor]);
 
   // Cleanup replay marker when leaving replay mode
@@ -759,4 +754,4 @@ export function LiveMap({
       </CardContent>
     </Card>
   );
-}
+});

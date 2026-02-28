@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { cn, formatDate } from "@/lib/utils";
 import type { LicenseStatus } from "@/types";
 import { AlertTriangle, Key } from "lucide-react";
@@ -16,6 +15,13 @@ export function LicenseStatusCard({ license, onGetLicense }: LicenseStatusCardPr
   const isExpiringSoon = license && daysRemaining > 0 && daysRemaining <= 7;
   const progressValue = license ? Math.min(100, (daysRemaining / 30) * 100) : 0;
 
+  const progressColor =
+    daysRemaining > 14
+      ? "from-emerald-500 to-emerald-400"
+      : daysRemaining > 7
+        ? "from-yellow-500 to-amber-400"
+        : "from-red-500 to-orange-400";
+
   return (
     <Card
       className={cn(
@@ -27,7 +33,7 @@ export function LicenseStatusCard({ license, onGetLicense }: LicenseStatusCardPr
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-white flex items-center gap-2">
-            <Key className="h-5 w-5" />
+            <Key className="h-5 w-5 text-emerald-400" />
             License Status
           </CardTitle>
           <Badge
@@ -56,9 +62,17 @@ export function LicenseStatusCard({ license, onGetLicense }: LicenseStatusCardPr
                 {daysRemaining}
               </span>
             </div>
-            <Progress value={progressValue} className="h-2 mb-4" />
+            <div className="h-2.5 bg-slate-800 rounded-full overflow-hidden mb-4">
+              <div
+                className={cn(
+                  "h-full rounded-full bg-gradient-to-r transition-all duration-1000 progress-shimmer",
+                  progressColor,
+                )}
+                style={{ width: `${progressValue}%` }}
+              />
+            </div>
             {isExpiringSoon && (
-              <div className="flex items-center gap-2 text-yellow-400 text-sm mb-4">
+              <div className="flex items-center gap-2 text-yellow-400 text-sm mb-4 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
                 <AlertTriangle className="h-4 w-4" />
                 <span>Your license is expiring soon!</span>
               </div>
@@ -67,7 +81,7 @@ export function LicenseStatusCard({ license, onGetLicense }: LicenseStatusCardPr
               Expires: {formatDate(license.subscription.currentPeriodEnd)}
             </p>
             <Button
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-black"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-black shadow-[0_0_12px_rgba(16,185,129,0.2)]"
               onClick={onGetLicense}
             >
               Renew Subscription
@@ -79,7 +93,7 @@ export function LicenseStatusCard({ license, onGetLicense }: LicenseStatusCardPr
               You don't have an active license. Get one to start using TibiaEye.
             </p>
             <Button
-              className="bg-emerald-500 hover:bg-emerald-600 text-black"
+              className="bg-emerald-500 hover:bg-emerald-600 text-black shadow-[0_0_12px_rgba(16,185,129,0.2)]"
               onClick={onGetLicense}
             >
               Get License

@@ -1,4 +1,6 @@
 import type {
+  BotConfig,
+  BotConfigResponse,
   BotRoute,
   Character,
   CharacterWithStatus,
@@ -16,6 +18,8 @@ import type {
   PositionHeatmapPoint,
   PositionLog,
   ProfitData,
+  RouteSegmentAnalytics,
+  RouteSuggestions,
   RouteWaypoint,
   Session,
   SessionDetail,
@@ -240,6 +244,22 @@ class ApiClient {
     return data;
   }
 
+  async getRouteSegments(routeId: string): Promise<RouteSegmentAnalytics> {
+    const { data } = await this.axiosInstance.get<RouteSegmentAnalytics>(
+      "/api/v1/analytics/route-segments",
+      { params: { routeId } }
+    );
+    return data;
+  }
+
+  async getRouteSuggestions(routeId: string): Promise<RouteSuggestions> {
+    const { data } = await this.axiosInstance.post<RouteSuggestions>(
+      "/api/v1/analytics/route-suggestions",
+      { routeId }
+    );
+    return data;
+  }
+
   async getTimeline(
     sessionId: string,
     params?: { limit?: number; cursor?: string }
@@ -412,6 +432,30 @@ class ApiClient {
   async getKillStatistics(world: string) {
     const { data } = await this.axiosInstance.get<KillStatistics>(
       `/api/v1/tibia-data/killstatistics/${encodeURIComponent(world)}`
+    );
+    return data;
+  }
+
+  // Bot Config
+  async getBotConfig(characterId: string) {
+    const { data } = await this.axiosInstance.get<BotConfigResponse>(
+      `/api/v1/characters/${characterId}/config`
+    );
+    return data;
+  }
+
+  async updateBotConfig(characterId: string, config: BotConfig) {
+    const { data } = await this.axiosInstance.put<BotConfigResponse>(
+      `/api/v1/characters/${characterId}/config`,
+      { config }
+    );
+    return data;
+  }
+
+  async patchBotConfig(characterId: string, config: Partial<BotConfig>) {
+    const { data } = await this.axiosInstance.patch<BotConfigResponse>(
+      `/api/v1/characters/${characterId}/config`,
+      { config }
     );
     return data;
   }
