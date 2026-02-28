@@ -8,12 +8,15 @@ WORKDIR /app
 # Dependencies stage
 # ================================
 FROM base AS dependencies
-COPY package.json bun.lockb turbo.json ./
+COPY package.json bun.lock turbo.json ./
+COPY apps/api/package.json ./apps/api/
 COPY apps/app/package.json ./apps/app/
-COPY packages/ui/package.json ./packages/ui/
+COPY apps/landing/package.json ./apps/landing/
+COPY apps/backoffice/package.json ./apps/backoffice/
 COPY packages/types/package.json ./packages/types/
 COPY packages/config-typescript/package.json ./packages/config-typescript/
 COPY packages/config-tailwind/package.json ./packages/config-tailwind/
+COPY packages/ui/package.json ./packages/ui/
 
 RUN bun install --frozen-lockfile
 

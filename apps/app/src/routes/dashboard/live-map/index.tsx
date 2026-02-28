@@ -79,7 +79,7 @@ function LiveMapPage() {
       {currentSession ? (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3">
-            <LiveMap sessionId={currentSession.id} />
+            <LiveMap position={null} isConnected={false} />
           </div>
 
           <div className="space-y-4">

@@ -6,7 +6,7 @@ import { NotFoundError } from "../../../shared/errors/index.js";
 interface GetCharacterSessionsInput {
   limit: number;
   page: number;
-  status?: "active" | "completed" | "crashed";
+  status?: "active" | "paused" | "completed" | "crashed";
 }
 
 export class GetCharacterSessionsUseCase {

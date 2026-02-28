@@ -85,13 +85,17 @@ function createCustomCRS(): L.CRS {
       }
     },
     latLngToPoint(latlng: L.LatLng, zoom: number) {
+      // @ts-expect-error -- Leaflet internal CRS API used at runtime
       const projectedPoint = this.projection.project(latlng);
       const s = this.scale(zoom);
+      // @ts-expect-error -- Leaflet internal CRS API used at runtime
       return this.transformation._transform(projectedPoint, s);
     },
     pointToLatLng(point: L.Point, zoom: number) {
       const s = this.scale(zoom);
+      // @ts-expect-error -- Leaflet internal CRS API used at runtime
       const untransformedPoint = this.transformation.untransform(point, s);
+      // @ts-expect-error -- Leaflet internal CRS API used at runtime
       return this.projection.unproject(untransformedPoint);
     },
   } as L.CRS);
@@ -109,6 +113,7 @@ function createTileLayer(floor: number): L.GridLayer {
     return tileSize;
   };
 
+  // @ts-expect-error -- overriding protected method for custom tile rendering
   layer.createTile = function (this: L.GridLayer, coords: L.Coords, done: L.DoneCallback) {
     const tile = document.createElement("canvas");
     const ctx = tile.getContext("2d")!;
@@ -235,7 +240,6 @@ export const LiveMap = memo(function LiveMap({
       attributionControl: false,
       fadeAnimation: false,
       maxBounds,
-      maxNativeZoom: 0,
       maxZoom: 4,
       minZoom: 0,
       zoom: 0,

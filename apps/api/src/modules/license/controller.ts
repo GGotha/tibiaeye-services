@@ -10,6 +10,7 @@ import {
 import { ValidateLicenseUseCase } from "./use-cases/validate-license.use-case.js";
 import { GetUserLicenseUseCase } from "./use-cases/get-user-license.use-case.js";
 import { GenerateLicenseUseCase } from "./use-cases/generate-license.use-case.js";
+import { AppError } from "../../shared/errors/index.js";
 
 export const licenseController: FastifyPluginAsyncZod = async (app) => {
   const licenseKeyRepo = app.getRepository(LicenseKeyEntity);
@@ -69,7 +70,7 @@ export const licenseController: FastifyPluginAsyncZod = async (app) => {
         },
       },
     },
-    async (request, reply) => {
+    async (request) => {
       const userId = request.user.sub;
 
       const subscription = await subscriptionRepo.findOne({
@@ -77,7 +78,7 @@ export const licenseController: FastifyPluginAsyncZod = async (app) => {
       });
 
       if (!subscription) {
-        return reply.code(400).send({ message: "No active subscription found" });
+        throw new AppError("No active subscription found");
       }
 
       const useCase = new GenerateLicenseUseCase(licenseKeyRepo);

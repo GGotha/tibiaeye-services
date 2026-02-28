@@ -5,11 +5,6 @@ import { CharacterEntity } from "../../../entities/character.entity.js";
 import { RouteEntity } from "../../../entities/route.entity.js";
 import type { RouteSegmentAnalytics } from "../schemas.js";
 
-interface SegmentKey {
-  fromIndex: number;
-  toIndex: number;
-}
-
 function percentile(sorted: number[], p: number): number {
   if (sorted.length === 0) return 0;
   const idx = (p / 100) * (sorted.length - 1);

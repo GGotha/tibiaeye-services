@@ -23,6 +23,9 @@ const envSchema = z.object({
   REDIS_PORT: z.coerce.number().default(6379),
   REDIS_PASSWORD: z.string().optional(),
 
+  // CORS
+  CORS_ORIGIN: z.string().optional(),
+
   // Email (SMTP)
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().optional(),

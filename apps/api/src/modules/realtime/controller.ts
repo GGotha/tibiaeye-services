@@ -85,7 +85,7 @@ export const realtimeController: FastifyPluginAsyncZod = async (app) => {
 
     const isBot = !!token?.startsWith("tm_");
     const userId = isBot
-      ? await authenticateWithLicenseKey(token, licenseKeyRepo, socket)
+      ? await authenticateWithLicenseKey(token!, licenseKeyRepo, socket)
       : await authenticateWithJwt(request, app, socket);
 
     if (!userId) return;

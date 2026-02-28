@@ -64,10 +64,11 @@ export const eventsController: FastifyPluginAsyncZod = async (app) => {
 
       for (const event of request.body.events) {
         if (event.type === "death" || event.type === "level_up") {
+          const { type: eventType, ...eventData } = event;
           broadcastToRoom(request.body.sessionId, {
             type: "event",
-            eventType: event.type,
-            ...event,
+            eventType,
+            ...eventData,
           });
         }
       }
@@ -76,10 +77,11 @@ export const eventsController: FastifyPluginAsyncZod = async (app) => {
       const timelineTypes = ["kill", "loot", "death", "level_up", "refill", "attack_start", "waypoint_reached", "warning", "heal", "pause", "resume", "disconnect", "reconnect_retry", "reconnect_success", "reconnect_failure"];
       for (const event of request.body.events) {
         if (timelineTypes.includes(event.type)) {
+          const { type: eventType, ...eventData } = event;
           broadcastToRoom(request.body.sessionId, {
             type: "timeline-event",
-            eventType: event.type,
-            ...event,
+            eventType,
+            ...eventData,
             timestamp: event.timestamp || new Date().toISOString(),
           });
         }

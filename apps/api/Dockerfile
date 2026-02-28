@@ -9,10 +9,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends dumb-init && rm
 # Dependencies stage
 # ================================
 FROM base AS dependencies
-COPY package.json bun.lockb turbo.json ./
+COPY package.json bun.lock turbo.json ./
 COPY apps/api/package.json ./apps/api/
+COPY apps/app/package.json ./apps/app/
+COPY apps/landing/package.json ./apps/landing/
+COPY apps/backoffice/package.json ./apps/backoffice/
 COPY packages/types/package.json ./packages/types/
 COPY packages/config-typescript/package.json ./packages/config-typescript/
+COPY packages/config-tailwind/package.json ./packages/config-tailwind/
+COPY packages/ui/package.json ./packages/ui/
 
 RUN bun install --frozen-lockfile
 
@@ -38,8 +43,9 @@ FROM base AS production
 ENV NODE_ENV=production
 
 COPY --from=builder /app/apps/api/dist ./dist
-COPY --from=builder /app/apps/api/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/api/package.json ./package.json
+
+RUN bun install --production
 
 USER bun
 EXPOSE 4000

@@ -1,5 +1,21 @@
 import { DataSource } from "typeorm";
 import { env } from "./env.js";
+import {
+  UserEntity,
+  PlanEntity,
+  SubscriptionEntity,
+  LicenseKeyEntity,
+  CharacterEntity,
+  SessionEntity,
+  KillEntity,
+  LootEntity,
+  ExperienceSnapshotEntity,
+  PositionLogEntity,
+  DiscordIntegrationEntity,
+  RouteEntity,
+  GameEventEntity,
+  BotConfigEntity,
+} from "../entities/index.js";
 
 export const dataSource = new DataSource({
   type: "postgres",
@@ -8,7 +24,22 @@ export const dataSource = new DataSource({
   username: env.DATABASE_USER,
   password: env.DATABASE_PASSWORD,
   database: env.DATABASE_NAME,
-  entities: ["src/entities/*.entity.ts"],
+  entities: [
+    UserEntity,
+    PlanEntity,
+    SubscriptionEntity,
+    LicenseKeyEntity,
+    CharacterEntity,
+    SessionEntity,
+    KillEntity,
+    LootEntity,
+    ExperienceSnapshotEntity,
+    PositionLogEntity,
+    DiscordIntegrationEntity,
+    RouteEntity,
+    GameEventEntity,
+    BotConfigEntity,
+  ],
   synchronize: env.NODE_ENV === "development",
   logging: env.NODE_ENV === "development",
 });

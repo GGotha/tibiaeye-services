@@ -97,6 +97,12 @@ export async function buildApp() {
     origin: (origin, cb) => {
       if (!origin) return cb(null, true);
 
+      if (env.CORS_ORIGIN) {
+        if (env.CORS_ORIGIN === "*") return cb(null, true);
+        const allowedOrigins = env.CORS_ORIGIN.split(",").map((o) => o.trim());
+        return cb(null, allowedOrigins.includes(origin));
+      }
+
       const allowed =
         origin.startsWith("http://localhost:") ||
         origin.startsWith("http://192.168.");

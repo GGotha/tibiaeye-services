@@ -47,7 +47,7 @@ async function authPlugin(fastify: FastifyInstance) {
   });
 
   // JWT authentication decorator - reads from cookie first, then Authorization header
-  fastify.decorate("authenticate", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.decorate("authenticate", async (request: FastifyRequest, _reply: FastifyReply) => {
     try {
       // Try cookie first
       const cookieToken = request.cookies[COOKIE_NAME];
@@ -64,7 +64,7 @@ async function authPlugin(fastify: FastifyInstance) {
   });
 
   // API Key authentication decorator (for bot) - only uses Authorization header
-  fastify.decorate("authenticateApiKey", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.decorate("authenticateApiKey", async (request: FastifyRequest, _reply: FastifyReply) => {
     const authHeader = request.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -120,8 +120,8 @@ async function authPlugin(fastify: FastifyInstance) {
   });
 
   // Admin role decorator
-  fastify.decorate("requireAdmin", async (request: FastifyRequest, reply: FastifyReply) => {
-    await fastify.authenticate(request, reply);
+  fastify.decorate("requireAdmin", async (request: FastifyRequest, _reply: FastifyReply) => {
+    await fastify.authenticate(request, _reply);
 
     if (request.user.role !== "admin") {
       throw new ForbiddenError("Admin access required");

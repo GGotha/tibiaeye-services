@@ -1,0 +1,47 @@
+name: Build & Push Docker Images
+
+on:
+  push:
+    branches: [master]
+
+env:
+  REGISTRY: docker.io
+  IMAGE_PREFIX: ${{ secrets.DOCKERHUB_USERNAME }}/tibiaeye
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - app: api
+            target: production
+          - app: app
+            target: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/${{ matrix.app }}/Dockerfile
+          push: true
+          target: ${{ matrix.target }}
+          tags: |
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:latest
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

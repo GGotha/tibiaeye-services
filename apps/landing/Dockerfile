@@ -8,7 +8,7 @@ WORKDIR /app
 # Dependencies stage
 # ================================
 FROM base AS dependencies
-COPY package.json bun.lockb turbo.json ./
+COPY package.json bun.lock turbo.json ./
 COPY apps/landing/package.json ./apps/landing/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/types/package.json ./packages/types/
