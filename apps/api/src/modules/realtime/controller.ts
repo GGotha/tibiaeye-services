@@ -66,7 +66,13 @@ interface StatusMessage {
   timestamp: string;
 }
 
-type ClientMessage = PositionMessage | JoinSessionMessage | LeaveSessionMessage | StatusMessage;
+interface ConfigAckMessage {
+  type: "config-ack";
+  sessionId: string;
+  version: number;
+}
+
+type ClientMessage = PositionMessage | JoinSessionMessage | LeaveSessionMessage | StatusMessage | ConfigAckMessage;
 
 export const realtimeController: FastifyPluginAsyncZod = async (app) => {
   const licenseKeyRepo = app.getRepository(LicenseKeyEntity);
@@ -120,6 +126,14 @@ export const realtimeController: FastifyPluginAsyncZod = async (app) => {
           }
           case "status": {
             await handleStatus(socket, userId, message, sessionRepo);
+            break;
+          }
+          case "config-ack": {
+            broadcastToRoom(
+              message.sessionId,
+              { type: "config-ack", sessionId: message.sessionId, version: message.version },
+              socket,
+            );
             break;
           }
           default:

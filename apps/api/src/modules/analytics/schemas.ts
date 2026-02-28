@@ -145,6 +145,52 @@ export const TimelineResponseSchema = z.object({
   nextCursor: z.string().nullable(),
 });
 
+// Route Segment Analytics
+export const RouteSegmentsQuerySchema = z.object({
+  routeId: z.string().uuid(),
+});
+
+export const RouteSegmentSchema = z.object({
+  fromIndex: z.number(),
+  toIndex: z.number(),
+  avgSeconds: z.number(),
+  medianSeconds: z.number(),
+  p95Seconds: z.number(),
+  minSeconds: z.number(),
+  maxSeconds: z.number(),
+  sampleCount: z.number(),
+  isSlow: z.boolean(),
+  isHighVariance: z.boolean(),
+});
+
+export const RouteSegmentAnalyticsSchema = z.object({
+  segments: z.array(RouteSegmentSchema),
+  totalAvgLoopSeconds: z.number(),
+  sessionCount: z.number(),
+  globalAvgSegmentSeconds: z.number(),
+});
+
+// Route AI Suggestions
+export const RouteSuggestionsBodySchema = z.object({
+  routeId: z.string().uuid(),
+});
+
+export const RouteSuggestionSchema = z.object({
+  type: z.string(),
+  segmentFrom: z.number(),
+  segmentTo: z.number(),
+  description: z.string(),
+  estimatedSavingsSeconds: z.number(),
+  priority: z.enum(["high", "medium", "low"]),
+});
+
+export const RouteSuggestionsSchema = z.object({
+  summary: z.string(),
+  overallScore: z.number(),
+  suggestions: z.array(RouteSuggestionSchema),
+  analyzedAt: z.string(),
+});
+
 export type TimelineQuery = z.infer<typeof TimelineQuerySchema>;
 export type TimelineEvent = z.infer<typeof TimelineEventSchema>;
 export type TimelineResponse = z.infer<typeof TimelineResponseSchema>;
@@ -161,3 +207,7 @@ export type KillsHeatmapPoint = z.infer<typeof KillsHeatmapPointSchema>;
 export type HuntAnalytics = z.infer<typeof HuntAnalyticsSchema>;
 export type PositionHeatmapQuery = z.infer<typeof PositionHeatmapQuerySchema>;
 export type PositionHeatmapPoint = z.infer<typeof PositionHeatmapPointSchema>;
+export type RouteSegmentsQuery = z.infer<typeof RouteSegmentsQuerySchema>;
+export type RouteSegmentAnalytics = z.infer<typeof RouteSegmentAnalyticsSchema>;
+export type RouteSuggestionsBody = z.infer<typeof RouteSuggestionsBodySchema>;
+export type RouteSuggestions = z.infer<typeof RouteSuggestionsSchema>;

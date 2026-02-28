@@ -5,6 +5,7 @@ export const CreateSessionSchema = z.object({
   huntLocation: z.string().optional(),
   initialLevel: z.number().int().positive().optional(),
   initialExperience: z.string().optional(), // bigint as string
+  routeId: z.string().uuid().optional(),
 });
 
 export const UpdateSessionSchema = z.object({

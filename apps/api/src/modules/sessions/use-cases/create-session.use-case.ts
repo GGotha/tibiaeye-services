@@ -38,6 +38,7 @@ export class CreateSessionUseCase {
     const session = this.sessionRepo.create({
       characterId: input.characterId,
       huntLocation: input.huntLocation || null,
+      routeId: input.routeId || null,
       status: SessionStatus.ACTIVE,
       initialLevel: input.initialLevel || null,
       initialExperience: input.initialExperience || null,

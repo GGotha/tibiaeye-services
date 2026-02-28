@@ -6,6 +6,7 @@ import { LootEntity } from "../../entities/loot.entity.js";
 import { SessionEntity } from "../../entities/session.entity.js";
 import { CharacterEntity } from "../../entities/character.entity.js";
 import { PositionLogEntity } from "../../entities/position-log.entity.js";
+import { RouteEntity } from "../../entities/route.entity.js";
 import {
   AnalyticsQuerySchema,
   CompareDataSchema,
@@ -20,6 +21,10 @@ import {
   PositionHeatmapQuerySchema,
   ProfitDataSchema,
   ProfitQuerySchema,
+  RouteSegmentAnalyticsSchema,
+  RouteSegmentsQuerySchema,
+  RouteSuggestionsBodySchema,
+  RouteSuggestionsSchema,
   TimelineQuerySchema,
   TimelineResponseSchema,
 } from "./schemas.js";
@@ -31,6 +36,8 @@ import { GetKillsHeatmapUseCase } from "./use-cases/get-kills-heatmap.use-case.j
 import { GetLootSummaryUseCase } from "./use-cases/get-loot-summary.use-case.js";
 import { GetPositionHeatmapUseCase } from "./use-cases/get-position-heatmap.use-case.js";
 import { GetProfitUseCase } from "./use-cases/get-profit.use-case.js";
+import { GetRouteSegmentsUseCase } from "./use-cases/get-route-segments.use-case.js";
+import { GetRouteSuggestionsUseCase } from "./use-cases/get-route-suggestions.use-case.js";
 
 export const analyticsController: FastifyPluginAsyncZod = async (app) => {
   const experienceRepo = app.getRepository(ExperienceSnapshotEntity);
@@ -40,6 +47,7 @@ export const analyticsController: FastifyPluginAsyncZod = async (app) => {
   const characterRepo = app.getRepository(CharacterEntity);
   const gameEventRepo = app.getRepository(GameEventEntity);
   const positionLogRepo = app.getRepository(PositionLogEntity);
+  const routeRepo = app.getRepository(RouteEntity);
 
   // GET /api/v1/analytics/experience/hourly
   app.get(
@@ -337,6 +345,44 @@ export const analyticsController: FastifyPluginAsyncZod = async (app) => {
     async (request) => {
       const useCase = new GetCompareUseCase(sessionRepo, characterRepo);
       return useCase.execute(request.user.sub, request.query);
+    },
+  );
+
+  // GET /api/v1/analytics/route-segments
+  app.get(
+    "/route-segments",
+    {
+      onRequest: [app.authenticate],
+      schema: {
+        tags: ["Analytics"],
+        summary: "Get timing analytics for route segments",
+        security: [{ bearerAuth: [] }],
+        querystring: RouteSegmentsQuerySchema,
+        response: { 200: RouteSegmentAnalyticsSchema },
+      },
+    },
+    async (request) => {
+      const useCase = new GetRouteSegmentsUseCase(gameEventRepo, sessionRepo, characterRepo, routeRepo);
+      return useCase.execute(request.user.sub, request.query.routeId);
+    },
+  );
+
+  // POST /api/v1/analytics/route-suggestions
+  app.post(
+    "/route-suggestions",
+    {
+      onRequest: [app.authenticate],
+      schema: {
+        tags: ["Analytics"],
+        summary: "Get AI-powered route optimization suggestions",
+        security: [{ bearerAuth: [] }],
+        body: RouteSuggestionsBodySchema,
+        response: { 200: RouteSuggestionsSchema },
+      },
+    },
+    async (request) => {
+      const useCase = new GetRouteSuggestionsUseCase(gameEventRepo, sessionRepo, characterRepo, routeRepo);
+      return useCase.execute(request.user.sub, request.body.routeId);
     },
   );
 };

@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { CharacterEntity } from "./character.entity.js";
+import { RouteEntity } from "./route.entity.js";
 
 export enum SessionStatus {
   ACTIVE = "active",
@@ -29,6 +30,13 @@ export class SessionEntity {
   @ManyToOne(() => CharacterEntity, { onDelete: "CASCADE" })
   @JoinColumn({ name: "characterId" })
   character: CharacterEntity;
+
+  @Column({ type: "uuid", nullable: true })
+  routeId: string | null;
+
+  @ManyToOne(() => RouteEntity, { onDelete: "SET NULL", nullable: true })
+  @JoinColumn({ name: "routeId" })
+  route: RouteEntity | null;
 
   @Column({ type: "varchar", length: 255, nullable: true })
   huntLocation: string | null;

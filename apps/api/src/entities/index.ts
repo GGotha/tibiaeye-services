@@ -14,3 +14,4 @@ export {
   DEFAULT_NOTIFICATION_PREFERENCES,
 } from "./discord-integration.entity.js";
 export { RouteEntity, type RouteWaypoint } from "./route.entity.js";
+export { BotConfigEntity } from "./bot-config.entity.js";

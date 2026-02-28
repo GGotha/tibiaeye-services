@@ -15,6 +15,7 @@ import { ListCharactersUseCase } from "./use-cases/list-characters.use-case.js";
 import { DeleteCharacterUseCase } from "./use-cases/delete-character.use-case.js";
 import { GetCharacterUseCase } from "./use-cases/get-character.use-case.js";
 import { GetCharacterSessionsUseCase } from "./use-cases/get-character-sessions.use-case.js";
+import { botConfigController } from "./bot-config.controller.js";
 
 export const charactersController: FastifyPluginAsyncZod = async (app) => {
   const characterRepo = app.getRepository(CharacterEntity);
@@ -170,4 +171,7 @@ export const charactersController: FastifyPluginAsyncZod = async (app) => {
       return useCase.execute(request.user.sub, request.params.id);
     },
   );
+
+  // Bot Config sub-routes: /api/v1/characters/:id/config
+  await app.register(botConfigController, { prefix: "/:id/config" });
 };
