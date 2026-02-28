@@ -8,7 +8,7 @@ export const CreateSessionSchema = z.object({
 });
 
 export const UpdateSessionSchema = z.object({
-  status: z.enum(["active", "completed", "crashed"]).optional(),
+  status: z.enum(["active", "paused", "completed", "crashed"]).optional(),
   huntLocation: z.string().optional(),
   finalLevel: z.number().int().positive().optional(),
   finalExperience: z.string().optional(), // bigint as string
@@ -22,7 +22,7 @@ export const SessionSchema = z.object({
   characterId: z.string().uuid(),
   characterName: z.string(),
   huntLocation: z.string().nullable(),
-  status: z.enum(["active", "completed", "crashed"]),
+  status: z.enum(["active", "paused", "completed", "crashed"]),
   startedAt: z.string().datetime(),
   endedAt: z.string().datetime().nullable(),
   initialLevel: z.number().nullable(),
@@ -46,9 +46,22 @@ export const PaginatedSessionListSchema = z.object({
 
 export const SessionQuerySchema = z.object({
   characterId: z.string().uuid().optional(),
-  status: z.enum(["active", "completed", "crashed"]).optional(),
+  status: z.enum(["active", "paused", "completed", "crashed"]).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   page: z.coerce.number().int().min(1).default(1),
+});
+
+export const PositionLogSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  z: z.number(),
+  recordedAt: z.string().datetime(),
+});
+
+export const PositionLogListSchema = z.array(PositionLogSchema);
+
+export const PositionLogQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50000).default(10000),
 });
 
 export type CreateSessionInput = z.infer<typeof CreateSessionSchema>;

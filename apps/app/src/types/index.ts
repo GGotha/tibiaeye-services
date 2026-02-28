@@ -81,7 +81,7 @@ export interface KillsByCreature {
 export interface LootSummary {
   items: Array<{
     itemName: string;
-    totalQuantity: number;
+    quantity: number;
     totalValue: number;
   }>;
   totalValue: number;
@@ -120,6 +120,9 @@ export interface BotStatus {
   botState: "running" | "paused" | "reconnecting" | "stopped";
   targetCreature: string | null;
   currentTask: string | null;
+  speed: number | null;
+  stamina: number | null;
+  capacity: number | null;
 }
 
 export interface ProfitSession {
@@ -160,9 +163,121 @@ export interface CompareData {
 
 export interface GameEvent {
   id: string;
-  type: "death" | "level_up" | "refill";
+  type: "death" | "level_up" | "refill" | "heal" | "pause" | "resume" | "disconnect" | "reconnect_retry" | "reconnect_success" | "reconnect_failure" | "warning";
   data: Record<string, unknown> | null;
   createdAt: string;
+}
+
+export interface KillsHeatmapPoint {
+  x: number;
+  y: number;
+  z: number;
+  kills: number;
+  totalExperience: number;
+}
+
+export interface HuntAnalytics {
+  huntLocation: string;
+  sessions: number;
+  totalDuration: number;
+  avgXpPerHour: number;
+  avgKillsPerHour: number;
+  totalLootValue: number;
+  avgProfitPerHour: number;
+}
+
+export interface PositionLog {
+  x: number;
+  y: number;
+  z: number;
+  recordedAt: string;
+}
+
+export interface PositionHeatmapPoint {
+  x: number;
+  y: number;
+  z: number;
+  visits: number;
+}
+
+export interface TimelineEvent {
+  type: string;
+  timestamp: string;
+  data: Record<string, unknown> | null;
+}
+
+export interface TimelineResponse {
+  events: TimelineEvent[];
+  nextCursor: string | null;
+}
+
+export interface NotificationPreferences {
+  sessionStarted: boolean;
+  sessionEnded: boolean;
+  death: boolean;
+  levelUp: boolean;
+  lootDrop: {
+    enabled: boolean;
+    minValue: number;
+  };
+  lowHp: {
+    enabled: boolean;
+    threshold: number;
+  };
+  botStuck: boolean;
+  periodicStats: {
+    enabled: boolean;
+    intervalMinutes: number;
+  };
+}
+
+export interface DiscordIntegration {
+  id: string;
+  label: string;
+  webhookId: string;
+  guildName: string | null;
+  channelName: string | null;
+  isActive: boolean;
+  notificationPreferences: NotificationPreferences;
+  lastNotifiedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateDiscordIntegrationInput {
+  webhookUrl: string;
+  label: string;
+  notificationPreferences?: Partial<NotificationPreferences>;
+}
+
+export interface UpdateDiscordIntegrationInput {
+  label?: string;
+  webhookUrl?: string;
+  isActive?: boolean;
+  notificationPreferences?: Partial<NotificationPreferences>;
+}
+
+// Routes / Waypoints
+export interface RouteWaypoint {
+  id: number;
+  type: string;
+  coordinate?: [number, number, number];
+  label?: string;
+  options?: Record<string, unknown>;
+  comment?: string;
+}
+
+export interface BotRoute {
+  id: string;
+  name: string;
+  description: string | null;
+  userId: string;
+  characterId: string | null;
+  waypoints: RouteWaypoint[];
+  metadata: Record<string, unknown> | null;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface SessionFilters {

@@ -9,6 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TibiaSprite } from "@/components/ui/tibia-sprite";
+import { outfitSpriteUrl } from "@/lib/tibia-sprites";
 import type { CharacterWithStatus } from "@/types";
 import { Link } from "@tanstack/react-router";
 import { History, Plus, Trash } from "lucide-react";
@@ -56,9 +58,16 @@ export function CharactersList({ characters, onAddClick, onDelete }: CharactersL
               {characters.map((char) => (
                 <TableRow key={char.id} className="border-slate-800 hover:bg-slate-800/50">
                   <TableCell>
-                    <div>
-                      <p className="font-medium text-white">{char.name}</p>
-                      {char.vocation && <p className="text-sm text-slate-400">{char.vocation}</p>}
+                    <div className="flex items-center gap-3">
+                      <TibiaSprite
+                        src={outfitSpriteUrl(char.vocation || "")}
+                        alt={char.name}
+                        size="md"
+                      />
+                      <div>
+                        <p className="font-medium text-white">{char.name}</p>
+                        {char.vocation && <p className="text-sm text-slate-400">{char.vocation}</p>}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-slate-300">{char.world}</TableCell>

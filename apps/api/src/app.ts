@@ -17,6 +17,7 @@ import cookiePlugin from "./plugins/cookie.plugin.js";
 import authPlugin from "./plugins/auth.plugin.js";
 import swaggerPlugin from "./plugins/swagger.plugin.js";
 import websocketPlugin from "./plugins/websocket.plugin.js";
+import queuePlugin from "./plugins/queue.plugin.js";
 
 // Controllers
 import { authController } from "./modules/auth/controller.js";
@@ -30,6 +31,9 @@ import { paymentsController } from "./modules/payments/controller.js";
 import { analyticsController } from "./modules/analytics/controller.js";
 import { adminController } from "./modules/admin/controller.js";
 import { realtimeController } from "./modules/realtime/controller.js";
+import { discordController } from "./modules/discord/controller.js";
+import { tibiaDataController } from "./modules/tibia-data/controller.js";
+import { routesController } from "./modules/routes/controller.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -90,7 +94,15 @@ export async function buildApp() {
 
   // Register plugins
   await app.register(cors, {
-    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003"],
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+
+      const allowed =
+        origin.startsWith("http://localhost:") ||
+        origin.startsWith("http://192.168.");
+
+      cb(null, allowed);
+    },
     credentials: true,
   });
 
@@ -103,6 +115,7 @@ export async function buildApp() {
   await app.register(cookiePlugin);
   await app.register(authPlugin);
   await app.register(websocketPlugin);
+  await app.register(queuePlugin);
 
   // Health check
   app.get("/health", async () => ({ status: "ok", timestamp: new Date().toISOString() }));
@@ -120,6 +133,9 @@ export async function buildApp() {
       await api.register(paymentsController, { prefix: "/payments" });
       await api.register(analyticsController, { prefix: "/analytics" });
       await api.register(adminController, { prefix: "/admin" });
+      await api.register(discordController, { prefix: "/discord" });
+      await api.register(tibiaDataController, { prefix: "/tibia-data" });
+      await api.register(routesController, { prefix: "/routes" });
     },
     { prefix: "/api/v1" },
   );

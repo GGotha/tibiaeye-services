@@ -33,7 +33,7 @@ function LiveMapPage() {
       : activeSessions.find((s) => s.id === selectedSessionId);
 
   const duration = currentSession
-    ? Math.round((Date.now() - new Date(currentSession.startedAt).getTime()) / 1000)
+    ? Math.max(0, Math.round((Date.now() - new Date(currentSession.startedAt).getTime()) / 1000))
     : 0;
 
   return (

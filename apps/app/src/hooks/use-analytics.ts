@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 export function useExperienceHourly(sessionId?: string) {
   return useQuery({
@@ -52,5 +52,47 @@ export function useCompareSessions(sessionIds: string[]) {
     queryKey: ["compare-sessions", sessionIds],
     queryFn: () => api.compareSessions(sessionIds),
     enabled: sessionIds.length >= 2,
+  });
+}
+
+export function useKillsHeatmap(sessionId?: string, startDate?: string) {
+  return useQuery({
+    queryKey: ["kills-heatmap", sessionId, startDate],
+    queryFn: () => api.getKillsHeatmap(sessionId, startDate),
+    enabled: !!sessionId,
+  });
+}
+
+export function useHuntAnalytics() {
+  return useQuery({
+    queryKey: ["hunt-analytics"],
+    queryFn: () => api.getHuntAnalytics(),
+  });
+}
+
+export function usePositionHeatmap(sessionId?: string, startDate?: string) {
+  return useQuery({
+    queryKey: ["position-heatmap", sessionId, startDate],
+    queryFn: () => api.getPositionHeatmap(sessionId!, startDate),
+    enabled: !!sessionId,
+  });
+}
+
+export function useTimeline(sessionId?: string, limit = 10) {
+  return useQuery({
+    queryKey: ["timeline", sessionId, limit],
+    queryFn: () => api.getTimeline(sessionId!, { limit }),
+    enabled: !!sessionId,
+    refetchInterval: 30000,
+  });
+}
+
+export function useTimelineInfinite(sessionId?: string) {
+  return useInfiniteQuery({
+    queryKey: ["timeline-infinite", sessionId],
+    queryFn: ({ pageParam }) => api.getTimeline(sessionId!, { limit: 50, cursor: pageParam }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled: !!sessionId,
   });
 }

@@ -7,3 +7,10 @@ export { SessionEntity, SessionStatus } from "./session.entity.js";
 export { KillEntity } from "./kill.entity.js";
 export { LootEntity } from "./loot.entity.js";
 export { ExperienceSnapshotEntity } from "./experience-snapshot.entity.js";
+export { PositionLogEntity } from "./position-log.entity.js";
+export {
+  DiscordIntegrationEntity,
+  type NotificationPreferences,
+  DEFAULT_NOTIFICATION_PREFERENCES,
+} from "./discord-integration.entity.js";
+export { RouteEntity, type RouteWaypoint } from "./route.entity.js";

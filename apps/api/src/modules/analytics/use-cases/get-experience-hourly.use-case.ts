@@ -3,7 +3,7 @@ import { In } from "typeorm";
 import { ExperienceSnapshotEntity } from "../../../entities/experience-snapshot.entity.js";
 import { SessionEntity } from "../../../entities/session.entity.js";
 import { CharacterEntity } from "../../../entities/character.entity.js";
-import type { AnalyticsQuery, ExperienceHourly } from "../schemas.js";
+import type { AnalyticsQuery, ExperienceHourlyResponse } from "../schemas.js";
 
 export class GetExperienceHourlyUseCase {
   constructor(
@@ -12,15 +12,17 @@ export class GetExperienceHourlyUseCase {
     private readonly characterRepo: Repository<CharacterEntity>,
   ) {}
 
-  async execute(userId: string, query: AnalyticsQuery): Promise<ExperienceHourly[]> {
+  async execute(userId: string, query: AnalyticsQuery): Promise<ExperienceHourlyResponse> {
     // Get user's characters
     const characters = await this.characterRepo.find({
       where: { userId },
       select: ["id"],
     });
 
+    const emptyResponse: ExperienceHourlyResponse = { xpPerHourAverage: 0, dataPoints: [] };
+
     if (characters.length === 0) {
-      return [];
+      return emptyResponse;
     }
 
     const characterIds = characters.map((c) => c.id);
@@ -35,13 +37,13 @@ export class GetExperienceHourlyUseCase {
       });
 
       if (!session || !characterIds.includes(session.characterId)) {
-        return [];
+        return emptyResponse;
       }
 
       sessionIds = [query.sessionId];
     } else if (query.characterId) {
       if (!characterIds.includes(query.characterId)) {
-        return [];
+        return emptyResponse;
       }
 
       const sessions = await this.sessionRepo.find({
@@ -60,23 +62,30 @@ export class GetExperienceHourlyUseCase {
     }
 
     if (sessionIds.length === 0) {
-      return [];
+      return { xpPerHourAverage: 0, dataPoints: [] };
     }
 
     // Get experience snapshots grouped by hour
     const result = await this.experienceRepo
       .createQueryBuilder("snapshot")
-      .select("DATE_FORMAT(snapshot.recordedAt, '%Y-%m-%d %H:00:00')", "hour")
+      .select("TO_CHAR(snapshot.recordedAt, 'YYYY-MM-DD HH24:00:00')", "hour")
       .addSelect("MAX(snapshot.experience) - MIN(snapshot.experience)", "experience")
+      .addSelect("MAX(snapshot.level)", "level")
       .where("snapshot.sessionId IN (:...sessionIds)", { sessionIds })
       .groupBy("hour")
       .orderBy("hour", "ASC")
       .getRawMany();
 
-    return result.map((row) => ({
-      hour: row.hour,
-      experience: Number(row.experience) || 0,
-      xpPerHour: Number(row.experience) || 0, // Same as experience for hourly
+    const dataPoints = result.map((row) => ({
+      timestamp: row.hour,
+      xpPerHour: Number(row.experience) || 0,
+      level: Number(row.level) || 0,
     }));
+
+    const xpPerHourAverage = dataPoints.length > 0
+      ? Math.round(dataPoints.reduce((sum, p) => sum + p.xpPerHour, 0) / dataPoints.length)
+      : 0;
+
+    return { xpPerHourAverage, dataPoints };
   }
 }

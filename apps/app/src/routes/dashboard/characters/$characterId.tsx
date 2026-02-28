@@ -2,10 +2,13 @@ import { SessionsTable } from "@/components/tables/sessions-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TibiaSprite } from "@/components/ui/tibia-sprite";
 import { useCharacter, useCharacterSessions } from "@/hooks/use-characters";
-import { formatDate } from "@/lib/utils";
+import { useTibiaCharacter } from "@/hooks/use-tibia-data";
+import { creatureSpriteUrl, outfitSpriteUrl } from "@/lib/tibia-sprites";
+import { formatDate, formatNumber, getRelativeTime } from "@/lib/utils";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Award, Clock, Globe, Skull, Star, User } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/characters/$characterId")({
   component: CharacterDetailPage,
@@ -15,6 +18,7 @@ function CharacterDetailPage() {
   const { characterId } = Route.useParams();
   const { data: character, isLoading: isLoadingCharacter } = useCharacter(characterId);
   const { data: sessionsData, isLoading: isLoadingSessions } = useCharacterSessions(characterId);
+  const { data: tibiaData } = useTibiaCharacter(character?.name);
 
   if (isLoadingCharacter) {
     return (
@@ -37,6 +41,10 @@ function CharacterDetailPage() {
     );
   }
 
+  const vocation = tibiaData?.vocation ?? character.vocation ?? "Unknown";
+  const sex = tibiaData?.sex ?? "Male";
+  const level = tibiaData?.level ?? character.level;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -45,6 +53,7 @@ function CharacterDetailPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
+        <TibiaSprite src={outfitSpriteUrl(vocation, sex)} alt={character.name} size="lg" />
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-white">{character.name}</h1>
@@ -55,23 +64,44 @@ function CharacterDetailPage() {
             )}
           </div>
           <p className="text-slate-400">
-            {character.vocation || "Unknown Vocation"} - {character.world}
+            {vocation} - {character.world}
           </p>
+          {tibiaData?.guild && (
+            <p className="text-sm text-cyan-400">
+              {tibiaData.guild.name} ({tibiaData.guild.rank})
+            </p>
+          )}
+          <div className="flex items-center gap-4 mt-1 text-xs text-slate-500">
+            {tibiaData && (
+              <>
+                <span>
+                  {tibiaData.accountStatus === "Premium Account" ? "Premium" : "Free Account"}
+                </span>
+                <span>Last login: {getRelativeTime(tibiaData.lastLogin)}</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-slate-900/50 border-slate-800">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-slate-400">Level</CardTitle>
+            <CardTitle className="text-sm text-slate-400 flex items-center gap-1.5">
+              <Star className="h-3.5 w-3.5" />
+              Level
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-white">{character.level || "-"}</p>
+            <p className="text-2xl font-bold text-white">{level || "-"}</p>
           </CardContent>
         </Card>
         <Card className="bg-slate-900/50 border-slate-800">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-slate-400">World</CardTitle>
+            <CardTitle className="text-sm text-slate-400 flex items-center gap-1.5">
+              <Globe className="h-3.5 w-3.5" />
+              World
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-white">{character.world}</p>
@@ -79,13 +109,97 @@ function CharacterDetailPage() {
         </Card>
         <Card className="bg-slate-900/50 border-slate-800">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-slate-400">Added</CardTitle>
+            <CardTitle className="text-sm text-slate-400 flex items-center gap-1.5">
+              <Award className="h-3.5 w-3.5" />
+              Achievement Points
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-white">
+              {tibiaData ? formatNumber(tibiaData.achievementPoints) : "-"}
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-900/50 border-slate-800">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-slate-400 flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" />
+              Added
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-white">{formatDate(character.createdAt)}</p>
           </CardContent>
         </Card>
       </div>
+
+      {tibiaData && tibiaData.deaths.length > 0 && (
+        <Card className="bg-slate-900/50 border-slate-800">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Skull className="h-5 w-5 text-red-400" />
+              Deaths Recentes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {tibiaData.deaths.slice(0, 5).map((death, index) => (
+              <div
+                key={`${death.time}-${index}`}
+                className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50"
+              >
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-1">
+                    {death.killers.slice(0, 3).map((killer) => (
+                      <TibiaSprite
+                        key={killer.name}
+                        src={creatureSpriteUrl(killer.name)}
+                        alt={killer.name}
+                        size="sm"
+                      />
+                    ))}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm text-white">
+                      <span className="text-slate-400">Lv {death.level}:</span> Killed by{" "}
+                      {death.killers.map((k) => k.name).join(" and ")}
+                    </p>
+                    <p className="text-xs text-slate-500">{death.time}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {tibiaData?.otherCharacters && tibiaData.otherCharacters.length > 1 && (
+        <Card className="bg-slate-900/50 border-slate-800">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Outros Characters
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {tibiaData.otherCharacters
+                .filter((c) => c.name !== character.name)
+                .map((c) => (
+                  <Badge
+                    key={c.name}
+                    className={
+                      c.status === "online"
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        : "bg-slate-500/10 text-slate-400 border-slate-500/20"
+                    }
+                  >
+                    {c.name} ({c.world})
+                  </Badge>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div>
         <h2 className="text-xl font-semibold text-white mb-4">Sessions History</h2>

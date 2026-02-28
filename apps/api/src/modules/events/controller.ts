@@ -10,6 +10,7 @@ import type { ApiKeyPayload } from "../../plugins/auth.plugin.js";
 import { BatchEventsSchema, BatchResultSchema } from "./schemas.js";
 import { ProcessBatchUseCase } from "./use-cases/process-batch.use-case.js";
 import { broadcastToRoom } from "../../shared/realtime/room-manager.js";
+import { getDiscordNotificationQueue } from "../../shared/queue/discord-notification.queue.js";
 
 export const eventsController: FastifyPluginAsyncZod = async (app) => {
   const sessionRepo = app.getRepository(SessionEntity);
@@ -47,6 +48,7 @@ export const eventsController: FastifyPluginAsyncZod = async (app) => {
 
       const session = await sessionRepo.findOne({
         where: { id: request.body.sessionId },
+        relations: ["character"],
       });
 
       if (session) {
@@ -58,6 +60,63 @@ export const eventsController: FastifyPluginAsyncZod = async (app) => {
           xpPerHour: session.xpPerHour,
           duration: session.duration,
         });
+      }
+
+      for (const event of request.body.events) {
+        if (event.type === "death" || event.type === "level_up") {
+          broadcastToRoom(request.body.sessionId, {
+            type: "event",
+            eventType: event.type,
+            ...event,
+          });
+        }
+      }
+
+      // Broadcast timeline events for real-time timeline updates
+      const timelineTypes = ["kill", "loot", "death", "level_up", "refill", "attack_start", "waypoint_reached", "warning", "heal", "pause", "resume", "disconnect", "reconnect_retry", "reconnect_success", "reconnect_failure"];
+      for (const event of request.body.events) {
+        if (timelineTypes.includes(event.type)) {
+          broadcastToRoom(request.body.sessionId, {
+            type: "timeline-event",
+            eventType: event.type,
+            ...event,
+            timestamp: event.timestamp || new Date().toISOString(),
+          });
+        }
+      }
+
+      const discordQueue = getDiscordNotificationQueue();
+      if (discordQueue && session) {
+        const characterName = session.character?.name ?? "Unknown";
+
+        for (const event of request.body.events) {
+          if (event.type === "death") {
+            await discordQueue.add("notification", {
+              userId: apiKey.userId,
+              sessionId: request.body.sessionId,
+              notificationType: "death",
+              data: { characterName, ...event },
+            });
+          }
+
+          if (event.type === "level_up") {
+            await discordQueue.add("notification", {
+              userId: apiKey.userId,
+              sessionId: request.body.sessionId,
+              notificationType: "levelUp",
+              data: { characterName, ...event },
+            });
+          }
+
+          if (event.type === "loot" && event.estimatedValue && event.estimatedValue > 0) {
+            await discordQueue.add("notification", {
+              userId: apiKey.userId,
+              sessionId: request.body.sessionId,
+              notificationType: "lootDrop",
+              data: { characterName, ...event },
+            });
+          }
+        }
       }
 
       return result;

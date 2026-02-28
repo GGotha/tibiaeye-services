@@ -12,7 +12,24 @@ import {
   updateRoomPosition,
   updateRoomStatus,
   broadcastToRoom,
+  registerBotSocket,
+  getBotSessionId,
+  getRoom,
 } from "../../shared/realtime/room-manager.js";
+import { addPosition, removeSession } from "../../shared/queue/position-buffer.js";
+import { getDiscordNotificationQueue } from "../../shared/queue/discord-notification.queue.js";
+import { env } from "../../config/env.js";
+import { Redis } from "ioredis";
+import {
+  LOW_HP_DEBOUNCE_SECONDS,
+  BOT_STUCK_DEBOUNCE_SECONDS,
+} from "../../modules/discord/constants.js";
+
+const redis = new Redis({
+  host: env.REDIS_HOST,
+  port: env.REDIS_PORT,
+  password: env.REDIS_PASSWORD || undefined,
+});
 
 interface PositionMessage {
   type: "position";
@@ -41,6 +58,11 @@ interface StatusMessage {
   botState: string;
   targetCreature?: string;
   currentTask?: string;
+  experience?: number;
+  level?: number;
+  speed?: number;
+  stamina?: number;
+  capacity?: number;
   timestamp: string;
 }
 
@@ -55,7 +77,8 @@ export const realtimeController: FastifyPluginAsyncZod = async (app) => {
     const token = url.searchParams.get("token");
     const sessionId = url.searchParams.get("session");
 
-    const userId = token?.startsWith("tm_")
+    const isBot = !!token?.startsWith("tm_");
+    const userId = isBot
       ? await authenticateWithLicenseKey(token, licenseKeyRepo, socket)
       : await authenticateWithJwt(request, app, socket);
 
@@ -69,6 +92,10 @@ export const realtimeController: FastifyPluginAsyncZod = async (app) => {
         return;
       }
       joinRoom(socket, sessionId);
+
+      if (isBot) {
+        registerBotSocket(socket, sessionId);
+      }
     }
 
     socket.send(JSON.stringify({ type: "connected", userId }));
@@ -103,7 +130,40 @@ export const realtimeController: FastifyPluginAsyncZod = async (app) => {
       }
     });
 
-    socket.on("close", () => {
+    socket.on("close", async () => {
+      const botSessionId = getBotSessionId(socket);
+      if (botSessionId) {
+        const closedSession = await sessionRepo.findOne({
+          where: { id: botSessionId, status: SessionStatus.ACTIVE },
+          relations: ["character"],
+        });
+
+        await sessionRepo.update(
+          { id: botSessionId, status: SessionStatus.ACTIVE },
+          { status: SessionStatus.COMPLETED, endedAt: new Date() },
+        );
+        broadcastToRoom(botSessionId, { type: "session-ended", sessionId: botSessionId });
+        removeSession(botSessionId);
+
+        if (closedSession) {
+          const discordQueue = getDiscordNotificationQueue();
+          if (discordQueue) {
+            await discordQueue.add("notification", {
+              userId: closedSession.character.userId,
+              sessionId: botSessionId,
+              notificationType: "sessionEnded",
+              data: {
+                characterName: closedSession.character.name,
+                duration: closedSession.duration,
+                totalKills: closedSession.totalKills,
+                xpPerHour: closedSession.xpPerHour,
+                totalLootValue: closedSession.totalLootValue,
+                huntLocation: closedSession.huntLocation,
+              },
+            });
+          }
+        }
+      }
       removeFromAllRooms(socket);
     });
   });
@@ -232,6 +292,8 @@ async function handlePosition(
     socket,
   );
 
+  addPosition(message.sessionId, message.x, message.y, message.z, position.timestamp);
+
   socket.send(JSON.stringify({ type: "position-ack", sessionId: message.sessionId }));
 }
 
@@ -260,6 +322,11 @@ async function handleStatus(
     botState: message.botState,
     targetCreature: message.targetCreature ?? null,
     currentTask: message.currentTask ?? null,
+    experience: message.experience ?? null,
+    level: message.level ?? null,
+    speed: message.speed ?? null,
+    stamina: message.stamina ?? null,
+    capacity: message.capacity ?? null,
     timestamp: message.timestamp || new Date().toISOString(),
   };
 
@@ -274,4 +341,48 @@ async function handleStatus(
     },
     socket,
   );
+
+  const discordQueue = getDiscordNotificationQueue();
+  if (!discordQueue) return;
+
+  const characterName = session.character.name;
+  const room = getRoom(message.sessionId);
+
+  if (message.hpPercent < 20) {
+    const debounceKey = `discord:lowHp:${message.sessionId}`;
+    const isNew = await redis.set(debounceKey, "1", "EX", LOW_HP_DEBOUNCE_SECONDS, "NX");
+    if (isNew === "OK") {
+      await discordQueue.add("notification", {
+        userId,
+        sessionId: message.sessionId,
+        notificationType: "lowHp",
+        data: {
+          characterName,
+          hpPercent: message.hpPercent,
+          positionX: room?.lastPosition?.x,
+          positionY: room?.lastPosition?.y,
+          positionZ: room?.lastPosition?.z,
+        },
+      });
+    }
+  }
+
+  if (message.botState === "stuck") {
+    const debounceKey = `discord:botStuck:${message.sessionId}`;
+    const isNew = await redis.set(debounceKey, "1", "EX", BOT_STUCK_DEBOUNCE_SECONDS, "NX");
+    if (isNew === "OK") {
+      await discordQueue.add("notification", {
+        userId,
+        sessionId: message.sessionId,
+        notificationType: "botStuck",
+        data: {
+          characterName,
+          currentTask: message.currentTask,
+          positionX: room?.lastPosition?.x,
+          positionY: room?.lastPosition?.y,
+          positionZ: room?.lastPosition?.z,
+        },
+      });
+    }
+  }
 }

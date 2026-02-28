@@ -1,3 +1,4 @@
+import { DiscordSettingsTab } from "@/components/settings/discord-settings-tab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -104,6 +105,7 @@ function SettingsPage() {
         <TabsList className="bg-slate-800">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="billing">Billing</TabsTrigger>
+          <TabsTrigger value="discord">Discord</TabsTrigger>
           <TabsTrigger value="danger">Danger Zone</TabsTrigger>
         </TabsList>
 
@@ -277,6 +279,10 @@ function SettingsPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="discord" className="mt-4">
+          <DiscordSettingsTab />
         </TabsContent>
 
         <TabsContent value="danger" className="mt-4">

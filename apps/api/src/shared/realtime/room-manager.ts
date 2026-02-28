@@ -9,11 +9,17 @@ interface SessionRoom {
     botState: string;
     targetCreature: string | null;
     currentTask: string | null;
+    experience: number | null;
+    level: number | null;
+    speed: number | null;
+    stamina: number | null;
+    capacity: number | null;
     timestamp: string;
   };
 }
 
 const rooms = new Map<string, SessionRoom>();
+const botSockets = new Map<WebSocket, string>();
 
 export function joinRoom(ws: WebSocket, sessionId: string): void {
   let room = rooms.get(sessionId);
@@ -55,12 +61,21 @@ export function leaveRoom(ws: WebSocket, sessionId: string): void {
 }
 
 export function removeFromAllRooms(ws: WebSocket): void {
+  botSockets.delete(ws);
   for (const [roomId, room] of rooms.entries()) {
     room.subscribers.delete(ws);
     if (room.subscribers.size === 0) {
       rooms.delete(roomId);
     }
   }
+}
+
+export function registerBotSocket(ws: WebSocket, sessionId: string): void {
+  botSockets.set(ws, sessionId);
+}
+
+export function getBotSessionId(ws: WebSocket): string | undefined {
+  return botSockets.get(ws);
 }
 
 export function updateRoomPosition(
@@ -83,6 +98,11 @@ export function updateRoomStatus(
     botState: string;
     targetCreature: string | null;
     currentTask: string | null;
+    experience: number | null;
+    level: number | null;
+    speed: number | null;
+    stamina: number | null;
+    capacity: number | null;
     timestamp: string;
   },
 ): void {

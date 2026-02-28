@@ -13,7 +13,10 @@ interface ActiveSessionBannerProps {
 
 export function ActiveSessionBanner({ session }: ActiveSessionBannerProps) {
   const { position, stats, botStatus, isConnected } = useRealtimeSession(session.id);
-  const duration = Math.round((Date.now() - new Date(session.startedAt).getTime()) / 1000);
+  const duration = Math.max(
+    0,
+    Math.round((Date.now() - new Date(session.startedAt).getTime()) / 1000)
+  );
 
   const totalKills = stats?.totalKills ?? session.totalKills;
   const totalExperience = stats?.totalExperience ?? Number(session.totalExperience);

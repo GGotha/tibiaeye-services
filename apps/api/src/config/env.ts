@@ -18,6 +18,11 @@ const envSchema = z.object({
   // Webhook
   WEBHOOK_SECRET: z.string().optional(),
 
+  // Redis
+  REDIS_HOST: z.string().default("localhost"),
+  REDIS_PORT: z.coerce.number().default(6379),
+  REDIS_PASSWORD: z.string().optional(),
+
   // Email (SMTP)
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().optional(),

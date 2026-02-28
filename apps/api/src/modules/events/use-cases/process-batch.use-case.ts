@@ -169,6 +169,161 @@ export class ProcessBatchUseCase {
         gameEvents.push(gameEvent);
         break;
       }
+
+      case "attack_start": {
+        const gameEvent = new GameEventEntity();
+        gameEvent.sessionId = sessionId;
+        gameEvent.type = "attack_start";
+        gameEvent.data = {
+          creatureName: event.creatureName,
+          positionX: event.positionX ?? null,
+          positionY: event.positionY ?? null,
+          positionZ: event.positionZ ?? null,
+        };
+        if (event.timestamp) {
+          gameEvent.createdAt = new Date(event.timestamp);
+        }
+        gameEvents.push(gameEvent);
+        break;
+      }
+
+      case "waypoint_reached": {
+        const gameEvent = new GameEventEntity();
+        gameEvent.sessionId = sessionId;
+        gameEvent.type = "waypoint_reached";
+        gameEvent.data = {
+          waypointIndex: event.waypointIndex,
+          waypointType: event.waypointType ?? null,
+          positionX: event.positionX ?? null,
+          positionY: event.positionY ?? null,
+          positionZ: event.positionZ ?? null,
+        };
+        if (event.timestamp) {
+          gameEvent.createdAt = new Date(event.timestamp);
+        }
+        gameEvents.push(gameEvent);
+        break;
+      }
+
+      case "warning": {
+        const gameEvent = new GameEventEntity();
+        gameEvent.sessionId = sessionId;
+        gameEvent.type = "warning";
+        gameEvent.data = {
+          message: event.message,
+          level: event.level,
+          positionX: event.positionX ?? null,
+          positionY: event.positionY ?? null,
+          positionZ: event.positionZ ?? null,
+        };
+        if (event.timestamp) {
+          gameEvent.createdAt = new Date(event.timestamp);
+        }
+        gameEvents.push(gameEvent);
+        break;
+      }
+
+      case "heal": {
+        const gameEvent = new GameEventEntity();
+        gameEvent.sessionId = sessionId;
+        gameEvent.type = "heal";
+        gameEvent.data = {
+          healType: event.healType,
+          hotkey: event.hotkey ?? null,
+          potionType: event.potionType ?? null,
+          hpPercent: event.hpPercent ?? null,
+          manaPercent: event.manaPercent ?? null,
+        };
+        if (event.timestamp) {
+          gameEvent.createdAt = new Date(event.timestamp);
+        }
+        gameEvents.push(gameEvent);
+        break;
+      }
+
+      case "pause": {
+        const gameEvent = new GameEventEntity();
+        gameEvent.sessionId = sessionId;
+        gameEvent.type = "pause";
+        gameEvent.data = {};
+        if (event.timestamp) {
+          gameEvent.createdAt = new Date(event.timestamp);
+        }
+        gameEvents.push(gameEvent);
+        break;
+      }
+
+      case "resume": {
+        const gameEvent = new GameEventEntity();
+        gameEvent.sessionId = sessionId;
+        gameEvent.type = "resume";
+        gameEvent.data = {};
+        if (event.timestamp) {
+          gameEvent.createdAt = new Date(event.timestamp);
+        }
+        gameEvents.push(gameEvent);
+        break;
+      }
+
+      case "disconnect": {
+        const gameEvent = new GameEventEntity();
+        gameEvent.sessionId = sessionId;
+        gameEvent.type = "disconnect";
+        gameEvent.data = {
+          reason: event.reason ?? null,
+        };
+        if (event.timestamp) {
+          gameEvent.createdAt = new Date(event.timestamp);
+        }
+        gameEvents.push(gameEvent);
+        break;
+      }
+
+      case "reconnect_retry": {
+        const gameEvent = new GameEventEntity();
+        gameEvent.sessionId = sessionId;
+        gameEvent.type = "reconnect_retry";
+        gameEvent.data = {
+          retryCount: event.retryCount ?? null,
+          reason: event.reason ?? null,
+        };
+        if (event.timestamp) {
+          gameEvent.createdAt = new Date(event.timestamp);
+        }
+        gameEvents.push(gameEvent);
+        break;
+      }
+
+      case "reconnect_success": {
+        const gameEvent = new GameEventEntity();
+        gameEvent.sessionId = sessionId;
+        gameEvent.type = "reconnect_success";
+        gameEvent.data = {
+          retryCount: event.retryCount ?? null,
+          durationSeconds: event.durationSeconds ?? null,
+        };
+        if (event.timestamp) {
+          gameEvent.createdAt = new Date(event.timestamp);
+        }
+        gameEvents.push(gameEvent);
+        break;
+      }
+
+      case "reconnect_failure": {
+        const gameEvent = new GameEventEntity();
+        gameEvent.sessionId = sessionId;
+        gameEvent.type = "reconnect_failure";
+        gameEvent.data = {
+          retryCount: event.retryCount ?? null,
+          reason: event.reason ?? null,
+          durationSeconds: event.durationSeconds ?? null,
+        };
+        if (event.timestamp) {
+          gameEvent.createdAt = new Date(event.timestamp);
+        }
+        gameEvents.push(gameEvent);
+        break;
+      }
     }
   }
 

@@ -1,12 +1,17 @@
 import { ActiveSessionBanner } from "@/components/cards/active-session-banner";
+import { BoostedCard } from "@/components/cards/boosted-card";
 import { BotStatusCard } from "@/components/cards/bot-status-card";
 import { LicenseStatusCard } from "@/components/cards/license-status-card";
+import { NextLevelCard } from "@/components/cards/next-level-card";
+import { RashidCard } from "@/components/cards/rashid-card";
 import { SessionCard } from "@/components/cards/session-card";
 import { StatsCard } from "@/components/cards/stats-card";
 import { XPChart } from "@/components/charts/xp-chart";
+import { LiveMap } from "@/components/map/live-map";
 import { Button } from "@/components/ui/button";
 import { useDashboardStats, useExperienceHourly } from "@/hooks/use-analytics";
 import { useLicenseStatus } from "@/hooks/use-license";
+import { useNotifications } from "@/hooks/use-notifications";
 import { useRealtimeSession } from "@/hooks/use-realtime";
 import { useActiveSession, useSessions } from "@/hooks/use-sessions";
 import { formatDuration, formatNumber } from "@/lib/utils";
@@ -23,7 +28,10 @@ function DashboardOverview() {
   const { data: licenseStatus } = useLicenseStatus();
   const { data: stats } = useDashboardStats();
   const { data: experienceData } = useExperienceHourly(activeSession?.id);
-  const { botStatus, isConnected } = useRealtimeSession(activeSession?.id ?? "");
+  const { position, botStatus, lastEvent, isConnected } = useRealtimeSession(
+    activeSession?.id ?? ""
+  );
+  useNotifications(activeSession?.id, botStatus, lastEvent, isConnected);
 
   const recentSessions = sessionsData?.data?.filter((s) => s.status !== "active") ?? [];
 
@@ -53,10 +61,8 @@ function DashboardOverview() {
         <BotStatusCard
           hpPercent={botStatus.hpPercent}
           manaPercent={botStatus.manaPercent}
-          botState={botStatus.botState}
           targetCreature={botStatus.targetCreature}
           currentTask={botStatus.currentTask}
-          isConnected={isConnected}
         />
       )}
 
@@ -87,22 +93,27 @@ function DashboardOverview() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           <XPChart
             data={experienceData?.dataPoints ?? []}
             averageXpPerHour={experienceData?.xpPerHourAverage ?? stats?.xpPerHour ?? 0}
           />
+          {activeSession && <LiveMap position={position} isConnected={isConnected} compact />}
         </div>
-        <div>
-          {licenseStatus && (
-            <LicenseStatusCard
-              hasLicense={licenseStatus.hasLicense}
-              status={licenseStatus.status}
-              daysRemaining={licenseStatus.daysRemaining}
-              expiresAt={licenseStatus.expiresAt}
-              onRenew={() => window.open("/pricing", "_blank")}
+        <div className="space-y-4">
+          {activeSession && botStatus && (
+            <NextLevelCard
+              experience={botStatus.experience ?? null}
+              level={botStatus.level ?? null}
+              xpPerHour={stats?.xpPerHour ?? 0}
             />
           )}
+          <BoostedCard />
+          <RashidCard />
+          <LicenseStatusCard
+            license={licenseStatus}
+            onGetLicense={() => window.open("/pricing", "_blank")}
+          />
         </div>
       </div>
 

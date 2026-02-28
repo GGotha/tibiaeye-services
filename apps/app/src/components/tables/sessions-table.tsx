@@ -37,12 +37,15 @@ export function SessionsTable({ sessions, onDelete }: SessionsTableProps) {
         </TableHeader>
         <TableBody>
           {sessions.map((session) => {
-            const duration = session.endedAt
-              ? Math.round(
-                  (new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()) /
-                    1000
-                )
-              : Math.round((Date.now() - new Date(session.startedAt).getTime()) / 1000);
+            const duration = Math.max(
+              0,
+              session.endedAt
+                ? Math.round(
+                    (new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()) /
+                      1000
+                  )
+                : Math.round((Date.now() - new Date(session.startedAt).getTime()) / 1000)
+            );
 
             return (
               <TableRow key={session.id} className="border-slate-800 hover:bg-slate-800/50">

@@ -11,6 +11,7 @@ import { CharacterEntity } from "./character.entity.js";
 
 export enum SessionStatus {
   ACTIVE = "active",
+  PAUSED = "paused",
   COMPLETED = "completed",
   CRASHED = "crashed",
 }
@@ -35,10 +36,10 @@ export class SessionEntity {
   @Column({ type: "enum", enum: SessionStatus, default: SessionStatus.ACTIVE })
   status: SessionStatus;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamptz" })
   startedAt: Date;
 
-  @Column({ type: "timestamp", nullable: true })
+  @Column({ type: "timestamptz", nullable: true })
   endedAt: Date | null;
 
   @Column({ type: "int", nullable: true })

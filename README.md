@@ -4,17 +4,17 @@ Plataforma SaaS de telemetria para bots de Tibia.
 
 ## Stack
 
-| App | Tecnologia | Porta |
-|-----|------------|-------|
-| Landing | NextJS 16 | 3000 |
-| App | React + Vite | 3001 |
-| Backoffice | React + Vite | 3002 |
-| API | NestJS + Bun | 4000 |
+| App        | Tecnologia   | Porta |
+| ---------- | ------------ | ----- |
+| Landing    | NextJS 16    | 3000  |
+| App        | React + Vite | 3001  |
+| Backoffice | React + Vite | 3002  |
+| API        | NestJS + Bun | 4000  |
 
 ## Pre-requisitos
 
 - Bun 1.1+
-- Docker (para MySQL)
+- Docker (para Postgres)
 
 ## Setup
 
@@ -30,7 +30,7 @@ bun install
 cp .env.example .env
 
 # Subir banco de dados
-docker compose up -d mysql
+docker compose up -d postgres
 
 # Rodar migrations
 bun run db:migrate
@@ -41,18 +41,18 @@ bun run dev
 
 ## Comandos
 
-| Comando | Descricao |
-|---------|-----------|
-| `bun run dev` | Roda todos os apps em modo desenvolvimento |
-| `bun run dev:landing` | Roda apenas a landing page |
-| `bun run dev:app` | Roda apenas o app do player |
-| `bun run dev:backoffice` | Roda apenas o backoffice |
-| `bun run dev:api` | Roda apenas a API |
-| `bun run build` | Build de producao de todos os apps |
-| `bun run lint` | Lint de todos os apps |
-| `bun run test` | Roda testes de todos os apps |
-| `bun run format` | Formata codigo com Biome |
-| `bun run clean` | Limpa cache e node_modules |
+| Comando                  | Descricao                                  |
+| ------------------------ | ------------------------------------------ |
+| `bun run dev`            | Roda todos os apps em modo desenvolvimento |
+| `bun run dev:landing`    | Roda apenas a landing page                 |
+| `bun run dev:app`        | Roda apenas o app do player                |
+| `bun run dev:backoffice` | Roda apenas o backoffice                   |
+| `bun run dev:api`        | Roda apenas a API                          |
+| `bun run build`          | Build de producao de todos os apps         |
+| `bun run lint`           | Lint de todos os apps                      |
+| `bun run test`           | Roda testes de todos os apps               |
+| `bun run format`         | Formata codigo com Biome                   |
+| `bun run clean`          | Limpa cache e node_modules                 |
 
 ## Estrutura
 
@@ -104,7 +104,7 @@ bun run docker:down
 bun run docker:down:volumes
 
 # Acessar MySQL
-bun run docker:mysql
+bun run docker:postgres
 ```
 
 ## Deploy

@@ -1,3 +1,4 @@
+import type { TimelineEvent } from "@/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface Position {
@@ -19,9 +20,30 @@ interface BotStatus {
   botState: string;
   targetCreature: string | null;
   currentTask: string | null;
+  experience: number | null;
+  level: number | null;
+  speed: number | null;
+  stamina: number | null;
+  capacity: number | null;
+  isStuck: boolean;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3333";
+function resolveApiUrl(): string {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl) return `http://${window.location.hostname}:3333`;
+
+  try {
+    const parsed = new URL(envUrl);
+    if (parsed.hostname === "localhost" && window.location.hostname !== "localhost") {
+      return `http://${window.location.hostname}:${parsed.port || "3333"}`;
+    }
+    return envUrl;
+  } catch {
+    return envUrl;
+  }
+}
+
+const API_URL = resolveApiUrl();
 const MAX_RECONNECT_DELAY_MS = 30000;
 const INITIAL_RECONNECT_DELAY_MS = 1000;
 
@@ -31,10 +53,17 @@ function getWsUrl(sessionId: string): string {
   return `${protocol}//${url.host}/ws?session=${sessionId}`;
 }
 
+export interface RealtimeEvent {
+  eventType: string;
+  data?: Record<string, unknown>;
+}
+
 export function useRealtimeSession(sessionId: string) {
   const [position, setPosition] = useState<Position | null>(null);
   const [stats, setStats] = useState<RealtimeStats | null>(null);
   const [botStatus, setBotStatus] = useState<BotStatus | null>(null);
+  const [lastEvent, setLastEvent] = useState<RealtimeEvent | null>(null);
+  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttemptRef = useRef(0);
@@ -86,7 +115,33 @@ export function useRealtimeSession(sessionId: string) {
               botState: data.botState,
               targetCreature: data.targetCreature,
               currentTask: data.currentTask,
+              experience: data.experience ?? null,
+              level: data.level ?? null,
+              speed: data.speed ?? null,
+              stamina: data.stamina ?? null,
+              capacity: data.capacity ?? null,
+              isStuck: data.isStuck ?? false,
             });
+            break;
+          case "event":
+            setLastEvent({
+              eventType: data.eventType,
+              data: data,
+            });
+            break;
+          case "timeline-event":
+            setTimelineEvents((prev) => {
+              const event: TimelineEvent = {
+                type: data.eventType,
+                timestamp: data.timestamp,
+                data: data,
+              };
+              const next = [event, ...prev];
+              return next.length > 100 ? next.slice(0, 100) : next;
+            });
+            break;
+          case "session-ended":
+            setBotStatus(null);
             break;
         }
       } catch {
@@ -108,7 +163,7 @@ export function useRealtimeSession(sessionId: string) {
     };
   }, [connect]);
 
-  return { position, stats, botStatus, isConnected };
+  return { position, stats, botStatus, lastEvent, timelineEvents, isConnected };
 }
 
 export function useRealtimePosition(sessionId: string) {

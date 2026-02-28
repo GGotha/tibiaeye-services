@@ -16,16 +16,20 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as DashboardWorldIndexRouteImport } from './routes/dashboard/world/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 import { Route as DashboardSessionsIndexRouteImport } from './routes/dashboard/sessions/index'
+import { Route as DashboardRoutesIndexRouteImport } from './routes/dashboard/routes/index'
 import { Route as DashboardProfitIndexRouteImport } from './routes/dashboard/profit/index'
 import { Route as DashboardLiveMapIndexRouteImport } from './routes/dashboard/live-map/index'
 import { Route as DashboardLicenseIndexRouteImport } from './routes/dashboard/license/index'
 import { Route as DashboardCompareIndexRouteImport } from './routes/dashboard/compare/index'
 import { Route as DashboardCharactersIndexRouteImport } from './routes/dashboard/characters/index'
 import { Route as DashboardAnalyticsIndexRouteImport } from './routes/dashboard/analytics/index'
-import { Route as DashboardSessionsSessionIdRouteImport } from './routes/dashboard/sessions/$sessionId'
+import { Route as DashboardRoutesRouteIdRouteImport } from './routes/dashboard/routes/$routeId'
 import { Route as DashboardCharactersCharacterIdRouteImport } from './routes/dashboard/characters/$characterId'
+import { Route as DashboardSessionsSessionIdIndexRouteImport } from './routes/dashboard/sessions/$sessionId/index'
+import { Route as DashboardSessionsSessionIdTimelineRouteImport } from './routes/dashboard/sessions/$sessionId/timeline'
 
 const TestMapRoute = TestMapRouteImport.update({
   id: '/test-map',
@@ -62,6 +66,11 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardWorldIndexRoute = DashboardWorldIndexRouteImport.update({
+  id: '/world/',
+  path: '/world/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
@@ -70,6 +79,11 @@ const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
 const DashboardSessionsIndexRoute = DashboardSessionsIndexRouteImport.update({
   id: '/sessions/',
   path: '/sessions/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardRoutesIndexRoute = DashboardRoutesIndexRouteImport.update({
+  id: '/routes/',
+  path: '/routes/',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardProfitIndexRoute = DashboardProfitIndexRouteImport.update({
@@ -103,16 +117,27 @@ const DashboardAnalyticsIndexRoute = DashboardAnalyticsIndexRouteImport.update({
   path: '/analytics/',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardSessionsSessionIdRoute =
-  DashboardSessionsSessionIdRouteImport.update({
-    id: '/sessions/$sessionId',
-    path: '/sessions/$sessionId',
-    getParentRoute: () => DashboardRoute,
-  } as any)
+const DashboardRoutesRouteIdRoute = DashboardRoutesRouteIdRouteImport.update({
+  id: '/routes/$routeId',
+  path: '/routes/$routeId',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardCharactersCharacterIdRoute =
   DashboardCharactersCharacterIdRouteImport.update({
     id: '/characters/$characterId',
     path: '/characters/$characterId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardSessionsSessionIdIndexRoute =
+  DashboardSessionsSessionIdIndexRouteImport.update({
+    id: '/sessions/$sessionId/',
+    path: '/sessions/$sessionId/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardSessionsSessionIdTimelineRoute =
+  DashboardSessionsSessionIdTimelineRouteImport.update({
+    id: '/sessions/$sessionId/timeline',
+    path: '/sessions/$sessionId/timeline',
     getParentRoute: () => DashboardRoute,
   } as any)
 
@@ -125,15 +150,19 @@ export interface FileRoutesByFullPath {
   '/auth/signup': typeof AuthSignupRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/characters/$characterId': typeof DashboardCharactersCharacterIdRoute
-  '/dashboard/sessions/$sessionId': typeof DashboardSessionsSessionIdRoute
+  '/dashboard/routes/$routeId': typeof DashboardRoutesRouteIdRoute
   '/dashboard/analytics/': typeof DashboardAnalyticsIndexRoute
   '/dashboard/characters/': typeof DashboardCharactersIndexRoute
   '/dashboard/compare/': typeof DashboardCompareIndexRoute
   '/dashboard/license/': typeof DashboardLicenseIndexRoute
   '/dashboard/live-map/': typeof DashboardLiveMapIndexRoute
   '/dashboard/profit/': typeof DashboardProfitIndexRoute
+  '/dashboard/routes/': typeof DashboardRoutesIndexRoute
   '/dashboard/sessions/': typeof DashboardSessionsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
+  '/dashboard/world/': typeof DashboardWorldIndexRoute
+  '/dashboard/sessions/$sessionId/timeline': typeof DashboardSessionsSessionIdTimelineRoute
+  '/dashboard/sessions/$sessionId/': typeof DashboardSessionsSessionIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -143,15 +172,19 @@ export interface FileRoutesByTo {
   '/auth/signup': typeof AuthSignupRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/characters/$characterId': typeof DashboardCharactersCharacterIdRoute
-  '/dashboard/sessions/$sessionId': typeof DashboardSessionsSessionIdRoute
+  '/dashboard/routes/$routeId': typeof DashboardRoutesRouteIdRoute
   '/dashboard/analytics': typeof DashboardAnalyticsIndexRoute
   '/dashboard/characters': typeof DashboardCharactersIndexRoute
   '/dashboard/compare': typeof DashboardCompareIndexRoute
   '/dashboard/license': typeof DashboardLicenseIndexRoute
   '/dashboard/live-map': typeof DashboardLiveMapIndexRoute
   '/dashboard/profit': typeof DashboardProfitIndexRoute
+  '/dashboard/routes': typeof DashboardRoutesIndexRoute
   '/dashboard/sessions': typeof DashboardSessionsIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
+  '/dashboard/world': typeof DashboardWorldIndexRoute
+  '/dashboard/sessions/$sessionId/timeline': typeof DashboardSessionsSessionIdTimelineRoute
+  '/dashboard/sessions/$sessionId': typeof DashboardSessionsSessionIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -163,15 +196,19 @@ export interface FileRoutesById {
   '/auth/signup': typeof AuthSignupRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/characters/$characterId': typeof DashboardCharactersCharacterIdRoute
-  '/dashboard/sessions/$sessionId': typeof DashboardSessionsSessionIdRoute
+  '/dashboard/routes/$routeId': typeof DashboardRoutesRouteIdRoute
   '/dashboard/analytics/': typeof DashboardAnalyticsIndexRoute
   '/dashboard/characters/': typeof DashboardCharactersIndexRoute
   '/dashboard/compare/': typeof DashboardCompareIndexRoute
   '/dashboard/license/': typeof DashboardLicenseIndexRoute
   '/dashboard/live-map/': typeof DashboardLiveMapIndexRoute
   '/dashboard/profit/': typeof DashboardProfitIndexRoute
+  '/dashboard/routes/': typeof DashboardRoutesIndexRoute
   '/dashboard/sessions/': typeof DashboardSessionsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
+  '/dashboard/world/': typeof DashboardWorldIndexRoute
+  '/dashboard/sessions/$sessionId/timeline': typeof DashboardSessionsSessionIdTimelineRoute
+  '/dashboard/sessions/$sessionId/': typeof DashboardSessionsSessionIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -184,15 +221,19 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/dashboard/'
     | '/dashboard/characters/$characterId'
-    | '/dashboard/sessions/$sessionId'
+    | '/dashboard/routes/$routeId'
     | '/dashboard/analytics/'
     | '/dashboard/characters/'
     | '/dashboard/compare/'
     | '/dashboard/license/'
     | '/dashboard/live-map/'
     | '/dashboard/profit/'
+    | '/dashboard/routes/'
     | '/dashboard/sessions/'
     | '/dashboard/settings/'
+    | '/dashboard/world/'
+    | '/dashboard/sessions/$sessionId/timeline'
+    | '/dashboard/sessions/$sessionId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -202,15 +243,19 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/dashboard'
     | '/dashboard/characters/$characterId'
-    | '/dashboard/sessions/$sessionId'
+    | '/dashboard/routes/$routeId'
     | '/dashboard/analytics'
     | '/dashboard/characters'
     | '/dashboard/compare'
     | '/dashboard/license'
     | '/dashboard/live-map'
     | '/dashboard/profit'
+    | '/dashboard/routes'
     | '/dashboard/sessions'
     | '/dashboard/settings'
+    | '/dashboard/world'
+    | '/dashboard/sessions/$sessionId/timeline'
+    | '/dashboard/sessions/$sessionId'
   id:
     | '__root__'
     | '/'
@@ -221,15 +266,19 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/dashboard/'
     | '/dashboard/characters/$characterId'
-    | '/dashboard/sessions/$sessionId'
+    | '/dashboard/routes/$routeId'
     | '/dashboard/analytics/'
     | '/dashboard/characters/'
     | '/dashboard/compare/'
     | '/dashboard/license/'
     | '/dashboard/live-map/'
     | '/dashboard/profit/'
+    | '/dashboard/routes/'
     | '/dashboard/sessions/'
     | '/dashboard/settings/'
+    | '/dashboard/world/'
+    | '/dashboard/sessions/$sessionId/timeline'
+    | '/dashboard/sessions/$sessionId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -292,6 +341,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/world/': {
+      id: '/dashboard/world/'
+      path: '/world'
+      fullPath: '/dashboard/world/'
+      preLoaderRoute: typeof DashboardWorldIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/settings/': {
       id: '/dashboard/settings/'
       path: '/settings'
@@ -304,6 +360,13 @@ declare module '@tanstack/react-router' {
       path: '/sessions'
       fullPath: '/dashboard/sessions/'
       preLoaderRoute: typeof DashboardSessionsIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/routes/': {
+      id: '/dashboard/routes/'
+      path: '/routes'
+      fullPath: '/dashboard/routes/'
+      preLoaderRoute: typeof DashboardRoutesIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/profit/': {
@@ -348,11 +411,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAnalyticsIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/sessions/$sessionId': {
-      id: '/dashboard/sessions/$sessionId'
-      path: '/sessions/$sessionId'
-      fullPath: '/dashboard/sessions/$sessionId'
-      preLoaderRoute: typeof DashboardSessionsSessionIdRouteImport
+    '/dashboard/routes/$routeId': {
+      id: '/dashboard/routes/$routeId'
+      path: '/routes/$routeId'
+      fullPath: '/dashboard/routes/$routeId'
+      preLoaderRoute: typeof DashboardRoutesRouteIdRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/characters/$characterId': {
@@ -362,35 +425,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCharactersCharacterIdRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/sessions/$sessionId/': {
+      id: '/dashboard/sessions/$sessionId/'
+      path: '/sessions/$sessionId'
+      fullPath: '/dashboard/sessions/$sessionId/'
+      preLoaderRoute: typeof DashboardSessionsSessionIdIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/sessions/$sessionId/timeline': {
+      id: '/dashboard/sessions/$sessionId/timeline'
+      path: '/sessions/$sessionId/timeline'
+      fullPath: '/dashboard/sessions/$sessionId/timeline'
+      preLoaderRoute: typeof DashboardSessionsSessionIdTimelineRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
 interface DashboardRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardCharactersCharacterIdRoute: typeof DashboardCharactersCharacterIdRoute
-  DashboardSessionsSessionIdRoute: typeof DashboardSessionsSessionIdRoute
+  DashboardRoutesRouteIdRoute: typeof DashboardRoutesRouteIdRoute
   DashboardAnalyticsIndexRoute: typeof DashboardAnalyticsIndexRoute
   DashboardCharactersIndexRoute: typeof DashboardCharactersIndexRoute
   DashboardCompareIndexRoute: typeof DashboardCompareIndexRoute
   DashboardLicenseIndexRoute: typeof DashboardLicenseIndexRoute
   DashboardLiveMapIndexRoute: typeof DashboardLiveMapIndexRoute
   DashboardProfitIndexRoute: typeof DashboardProfitIndexRoute
+  DashboardRoutesIndexRoute: typeof DashboardRoutesIndexRoute
   DashboardSessionsIndexRoute: typeof DashboardSessionsIndexRoute
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
+  DashboardWorldIndexRoute: typeof DashboardWorldIndexRoute
+  DashboardSessionsSessionIdTimelineRoute: typeof DashboardSessionsSessionIdTimelineRoute
+  DashboardSessionsSessionIdIndexRoute: typeof DashboardSessionsSessionIdIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardCharactersCharacterIdRoute: DashboardCharactersCharacterIdRoute,
-  DashboardSessionsSessionIdRoute: DashboardSessionsSessionIdRoute,
+  DashboardRoutesRouteIdRoute: DashboardRoutesRouteIdRoute,
   DashboardAnalyticsIndexRoute: DashboardAnalyticsIndexRoute,
   DashboardCharactersIndexRoute: DashboardCharactersIndexRoute,
   DashboardCompareIndexRoute: DashboardCompareIndexRoute,
   DashboardLicenseIndexRoute: DashboardLicenseIndexRoute,
   DashboardLiveMapIndexRoute: DashboardLiveMapIndexRoute,
   DashboardProfitIndexRoute: DashboardProfitIndexRoute,
+  DashboardRoutesIndexRoute: DashboardRoutesIndexRoute,
   DashboardSessionsIndexRoute: DashboardSessionsIndexRoute,
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
+  DashboardWorldIndexRoute: DashboardWorldIndexRoute,
+  DashboardSessionsSessionIdTimelineRoute:
+    DashboardSessionsSessionIdTimelineRoute,
+  DashboardSessionsSessionIdIndexRoute: DashboardSessionsSessionIdIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

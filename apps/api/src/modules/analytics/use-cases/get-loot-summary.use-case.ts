@@ -70,7 +70,7 @@ export class GetLootSummaryUseCase {
       .addSelect("SUM(COALESCE(loot.estimatedValue, 0) * loot.quantity)", "totalValue")
       .where("loot.sessionId IN (:...sessionIds)", { sessionIds })
       .groupBy("loot.itemName")
-      .orderBy("totalValue", "DESC")
+      .orderBy('"totalValue"', "DESC")
       .limit(100)
       .getRawMany();
 

@@ -11,11 +11,14 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session }: SessionCardProps) {
-  const duration = session.endedAt
-    ? Math.round(
-        (new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()) / 1000
-      )
-    : Math.round((Date.now() - new Date(session.startedAt).getTime()) / 1000);
+  const duration = Math.max(
+    0,
+    session.endedAt
+      ? Math.round(
+          (new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()) / 1000
+        )
+      : Math.round((Date.now() - new Date(session.startedAt).getTime()) / 1000)
+  );
 
   return (
     <Link to="/dashboard/sessions/$sessionId" params={{ sessionId: session.id }}>

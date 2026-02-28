@@ -31,6 +31,9 @@ export class UpdateSessionUseCase {
       if (input.status === "completed" || input.status === "crashed") {
         session.endedAt = new Date();
       }
+      if (input.status === "active") {
+        session.endedAt = null;
+      }
     }
 
     if (input.huntLocation !== undefined) {

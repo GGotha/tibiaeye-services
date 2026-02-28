@@ -1,67 +1,38 @@
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { TibiaSprite } from "@/components/ui/tibia-sprite";
+import { creatureSpriteUrl } from "@/lib/tibia-sprites";
 import { cn } from "@/lib/utils";
-import { Cog, Crosshair, Droplets, Heart } from "lucide-react";
+import { Clock, Cog, Crosshair, Droplets, Gauge, Heart, Weight } from "lucide-react";
+
+function formatStamina(minutes: number | null): string {
+  if (minutes == null) return "--";
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}h${String(m).padStart(2, "0")}m`;
+}
 
 interface BotStatusCardProps {
   hpPercent: number;
   manaPercent: number;
-  botState: string;
   targetCreature: string | null;
   currentTask: string | null;
-  isConnected: boolean;
+  speed?: number | null;
+  stamina?: number | null;
+  capacity?: number | null;
 }
-
-const stateConfig: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  running: {
-    label: "Running",
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
-  },
-  paused: {
-    label: "Paused",
-    color: "text-yellow-400",
-    bg: "bg-yellow-500/10",
-    border: "border-yellow-500/20",
-  },
-  reconnecting: {
-    label: "Reconnecting",
-    color: "text-orange-400",
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/20",
-  },
-  stopped: {
-    label: "Stopped",
-    color: "text-red-400",
-    bg: "bg-red-500/10",
-    border: "border-red-500/20",
-  },
-};
 
 export function BotStatusCard({
   hpPercent,
   manaPercent,
-  botState,
   targetCreature,
   currentTask,
-  isConnected,
+  speed,
+  stamina,
+  capacity,
 }: BotStatusCardProps) {
-  const state = stateConfig[botState] ?? stateConfig.stopped;
-
   return (
     <Card className="bg-slate-900/50 border-slate-800">
       <CardContent className="p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-slate-400">Bot Status</h3>
-          <div className="flex items-center gap-2">
-            <span
-              className={cn("h-2 w-2 rounded-full", isConnected ? "bg-emerald-500" : "bg-red-500")}
-            />
-            <Badge className={cn(state.bg, state.color, state.border)}>{state.label}</Badge>
-          </div>
-        </div>
-
         <div className="space-y-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
@@ -100,6 +71,7 @@ export function BotStatusCard({
         <div className="space-y-2 pt-2 border-t border-slate-800">
           {targetCreature && (
             <div className="flex items-center gap-2 text-sm">
+              <TibiaSprite src={creatureSpriteUrl(targetCreature)} alt={targetCreature} size="sm" />
               <Crosshair className="h-3.5 w-3.5 text-red-400" />
               <span className="text-slate-400">Target:</span>
               <span className="text-white font-medium">{targetCreature}</span>
@@ -110,6 +82,31 @@ export function BotStatusCard({
               <Cog className="h-3.5 w-3.5 text-slate-400" />
               <span className="text-slate-400">Task:</span>
               <span className="text-white">{currentTask}</span>
+            </div>
+          )}
+          {(speed != null || stamina != null || capacity != null) && (
+            <div className="flex items-center gap-4 pt-1">
+              {speed != null && (
+                <div className="flex items-center gap-1.5 text-sm">
+                  <Gauge className="h-3.5 w-3.5 text-cyan-400" />
+                  <span className="text-slate-400">Speed:</span>
+                  <span className="text-white">{speed}</span>
+                </div>
+              )}
+              {stamina != null && (
+                <div className="flex items-center gap-1.5 text-sm">
+                  <Clock className="h-3.5 w-3.5 text-green-400" />
+                  <span className="text-slate-400">Stamina:</span>
+                  <span className="text-white">{formatStamina(stamina)}</span>
+                </div>
+              )}
+              {capacity != null && (
+                <div className="flex items-center gap-1.5 text-sm">
+                  <Weight className="h-3.5 w-3.5 text-amber-400" />
+                  <span className="text-slate-400">Cap:</span>
+                  <span className="text-white">{capacity} oz</span>
+                </div>
+              )}
             </div>
           )}
         </div>

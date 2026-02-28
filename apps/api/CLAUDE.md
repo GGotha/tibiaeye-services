@@ -6,7 +6,7 @@ API REST para o sistema de telemetria TibiaEye. Recebe dados do bot Python, serv
 
 - Bun runtime
 - Fastify 5.x framework
-- TypeORM + MySQL
+- TypeORM + Postgres
 - Zod (validation)
 - fastify-type-provider-zod
 - @fastify/swagger + @scalar/fastify-api-reference
@@ -143,9 +143,10 @@ src/
 
 ## Banco de Dados
 
-MySQL com TypeORM. Em desenvolvimento, `synchronize: true` cria as tabelas automaticamente.
+Postgres com TypeORM. Em desenvolvimento, `synchronize: true` cria as tabelas automaticamente.
 
 Para producao, usar migrations:
+
 ```bash
 bun run migration:generate
 bun run migration:run
@@ -154,8 +155,8 @@ bun run migration:run
 ## Docker
 
 ```bash
-docker-compose up -d mysql  # Apenas MySQL
-docker-compose up -d        # MySQL + API
+docker-compose up -d postgres  # Apenas postgres
+docker-compose up -d        # postgres + API
 ```
 
 ## Variaveis de Ambiente
@@ -207,8 +208,10 @@ Apos iniciar o servidor: http://localhost:4000/api/docs
 Aplicar patterns com intencao, nao por habito. Cada pattern resolve um problema especifico:
 
 ### Builder
+
 **Quando**: Construcao de objetos complexos com muitos parametros opcionais ou validacoes encadeadas.
 **Onde usar**: Entidades com muitas propriedades, objetos de configuracao, queries complexas.
+
 ```
 // Exemplo: construir uma Session com validacao incremental
 SessionBuilder.create()
@@ -219,30 +222,37 @@ SessionBuilder.create()
 ```
 
 ### Strategy
+
 **Quando**: Multiplos comportamentos intercambiaveis selecionados em runtime. Substitui cadeias de if/else ou switch.
 **Onde usar**: Calculo de analytics com formulas diferentes por tipo, processamento de eventos por categoria, regras de validacao variaveis.
+
 ```
 // Ao inves de: if (type === 'xp') { ... } else if (type === 'loot') { ... }
 // Usar: analyticsStrategyMap[type].calculate(data)
 ```
 
 ### Factory
+
 **Quando**: Criacao de objetos que dependem de condicoes ou configuracao, especialmente servicos externos que podem ser trocados.
 **Onde usar**: Criar instancias de servicos de pagamento, email, notificacao. Facilita trocar implementacoes (ex: trocar provedor de email).
+
 ```
 // PaymentGatewayFactory.create('abacatepay') -> AbacatePayGateway
 // PaymentGatewayFactory.create('stripe') -> StripeGateway
 ```
 
 ### Repository (obrigatorio)
+
 **Quando**: Sempre. Todo acesso a dados passa por uma interface de repositorio.
 **Onde usar**: Cada aggregate root tem seu repositorio. Interface no Domain, implementacao na Infrastructure.
 
 ### Mapper
+
 **Quando**: Sempre que houver conversao entre camadas (Domain Entity <-> ORM Entity, Domain Entity <-> DTO).
 **Onde usar**: Na Infrastructure para converter entre TypeORM entities e Domain entities.
 
 ### Outros patterns (usar quando necessario)
+
 - **Observer/EventEmitter**: Para desacoplar side effects (enviar email apos criar subscription).
 - **Specification**: Para encapsular regras de negocio compostas reutilizaveis.
 - **Value Object**: Para conceitos identificados por valor, nao por ID.

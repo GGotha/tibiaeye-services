@@ -9,11 +9,10 @@ import { SubscriptionEntity } from "../entities/subscription.entity.js";
 import { LicenseKeyEntity } from "../entities/license-key.entity.js";
 import { CharacterEntity } from "../entities/character.entity.js";
 
-
 const dataSource = new DataSource({
-  type: "mysql",
+  type: "postgres",
   host: process.env.DATABASE_HOST || "localhost",
-  port: Number(process.env.DATABASE_PORT) || 3306,
+  port: Number(process.env.DATABASE_PORT) || 5432,
   username: process.env.DATABASE_USER || "root",
   password: process.env.DATABASE_PASSWORD || "root",
   database: process.env.DATABASE_NAME || "tibiaeye_development",
@@ -75,23 +74,35 @@ async function seed() {
 
   const proPlan = planRepo.create({
     name: "Pro",
-    priceMonthly: 9.90,
-    priceYearly: 99.90,
+    priceMonthly: 9.9,
+    priceYearly: 99.9,
     maxCharacters: 5,
     historyDays: 30,
     apiRequestsPerDay: 10000,
-    features: ["5 characters", "30 days history", "Advanced analytics", "Live map", "Priority support"],
+    features: [
+      "5 characters",
+      "30 days history",
+      "Advanced analytics",
+      "Live map",
+      "Priority support",
+    ],
     isActive: true,
   });
 
   const enterprisePlan = planRepo.create({
     name: "Enterprise",
-    priceMonthly: 29.90,
-    priceYearly: 299.90,
+    priceMonthly: 29.9,
+    priceYearly: 299.9,
     maxCharacters: 20,
     historyDays: 365,
     apiRequestsPerDay: 100000,
-    features: ["20 characters", "1 year history", "All features", "API access", "Dedicated support"],
+    features: [
+      "20 characters",
+      "1 year history",
+      "All features",
+      "API access",
+      "Dedicated support",
+    ],
     isActive: true,
   });
 
