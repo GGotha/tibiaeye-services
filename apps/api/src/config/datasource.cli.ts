@@ -1,5 +1,5 @@
+import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { env } from "./env.js";
 import {
   UserEntity,
   PlanEntity,
@@ -17,13 +17,13 @@ import {
   BotConfigEntity,
 } from "../entities/index.js";
 
-export const dataSource = new DataSource({
+export default new DataSource({
   type: "postgres",
-  host: env.DATABASE_HOST,
-  port: env.DATABASE_PORT,
-  username: env.DATABASE_USER,
-  password: env.DATABASE_PASSWORD,
-  database: env.DATABASE_NAME,
+  host: process.env.DATABASE_HOST ?? "localhost",
+  port: Number(process.env.DATABASE_PORT ?? 5432),
+  username: process.env.DATABASE_USER ?? "postgres",
+  password: process.env.DATABASE_PASSWORD ?? "postgres",
+  database: process.env.DATABASE_NAME ?? "tibia_telemetry",
   entities: [
     UserEntity,
     PlanEntity,
@@ -40,8 +40,5 @@ export const dataSource = new DataSource({
     GameEventEntity,
     BotConfigEntity,
   ],
-  synchronize: env.NODE_ENV === "development",
-  migrations: ["dist/migrations/*.js"],
-  migrationsRun: true,
-  logging: env.NODE_ENV === "development",
+  migrations: ["src/migrations/*.ts"],
 });
