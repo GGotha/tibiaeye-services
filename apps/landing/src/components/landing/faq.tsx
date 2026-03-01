@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/accordion";
 import { motion } from "framer-motion";
 
+const spring = { type: "spring" as const, stiffness: 100, damping: 20 };
+
 const faqs = [
   {
     question: "O que é um pixel bot?",
@@ -63,48 +65,59 @@ const faqs = [
 
 export function FAQ() {
   return (
-    <section id="faq" className="py-24 bg-slate-900/50">
-      <div className="max-w-3xl mx-auto px-4">
+    <section id="faq" className="relative py-32">
+      <div className="section-divider" />
+
+      <div className="max-w-4xl mx-auto px-6 pt-32">
         <div className="text-center mb-16">
           <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            className="text-emerald-400 font-semibold mb-4"
+            transition={spring}
+            className="text-xs uppercase tracking-[0.15em] text-emerald-400 font-medium mb-5"
           >
             FAQ
           </motion.p>
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold text-white mb-4"
+            transition={{ ...spring, delay: 0.05 }}
+            className="text-4xl md:text-6xl font-bold text-[#F8FAFC] tracking-[-0.03em] mb-6"
           >
             Perguntas frequentes
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-slate-400 text-lg"
+            transition={{ ...spring, delay: 0.1 }}
+            className="text-[#94A3B8] text-lg"
           >
             Tudo que você precisa saber sobre o TibiaEye.
           </motion.p>
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           viewport={{ once: true }}
+          transition={{ ...spring, delay: 0.15 }}
         >
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="text-left text-white hover:text-emerald-400">
+              <AccordionItem
+                key={index}
+                value={`item-${index}`}
+                className="border-white/[0.06]"
+              >
+                <AccordionTrigger className="text-left text-[#F8FAFC] hover:text-emerald-400 text-lg tracking-[-0.01em] py-5">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-slate-400">{faq.answer}</AccordionContent>
+                <AccordionContent className="text-[#94A3B8] leading-relaxed pb-5">
+                  {faq.answer}
+                </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>

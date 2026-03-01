@@ -21,51 +21,52 @@ const footerLinks = {
   ],
 };
 
+const socialLinks = [
+  { icon: Twitter, href: "https://twitter.com/tibiaeye", label: "Twitter" },
+  { icon: Github, href: "https://github.com/tibiaeye", label: "GitHub" },
+  { icon: MessageCircle, href: "https://discord.gg/tibiaeye", label: "Discord" },
+];
+
 export function Footer() {
   return (
-    <footer className="bg-slate-950 border-t border-slate-800">
-      <div className="max-w-6xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <footer className="relative">
+      {/* Top divider */}
+      <div className="section-divider" />
+
+      <div className="max-w-7xl mx-auto px-6 pt-16 pb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4">
+            <Link href="/" className="flex items-center gap-2.5 mb-5">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center">
-                <Eye className="h-5 w-5 text-slate-900" />
+                <Eye className="h-4.5 w-4.5 text-[#06060B]" />
               </div>
-              <span className="text-xl font-bold text-white">TibiaEye</span>
+              <span className="text-lg font-bold text-white tracking-[-0.02em]">TibiaEye</span>
             </Link>
-            <p className="text-slate-400 text-sm mb-4">
+            <p className="text-[#64748B] text-sm leading-relaxed mb-6">
               Bot de Tibia com dashboard em tempo real. Acompanhe suas hunts de qualquer lugar.
             </p>
-            <div className="flex gap-4">
-              <a
-                href="https://twitter.com/tibiaeye"
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a
-                href="https://github.com/tibiaeye"
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                <Github className="h-5 w-5" />
-              </a>
-              <a
-                href="https://discord.gg/tibiaeye"
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                <MessageCircle className="h-5 w-5" />
-              </a>
+            <div className="flex gap-3">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  aria-label={link.label}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center text-[#64748B] hover:text-white hover:bg-white/[0.06] transition-all duration-300"
+                >
+                  <link.icon className="h-4 w-4" />
+                </a>
+              ))}
             </div>
           </div>
 
           <div>
-            <h4 className="text-white font-semibold mb-4">Product</h4>
-            <ul className="space-y-2">
+            <h4 className="text-xs uppercase tracking-[0.15em] text-[#94A3B8] font-medium mb-5">Product</h4>
+            <ul className="space-y-3">
               {footerLinks.product.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-slate-400 hover:text-white transition-colors text-sm"
+                    className="text-[#64748B] hover:text-[#F8FAFC] transition-colors duration-300 text-sm"
                   >
                     {link.name}
                   </Link>
@@ -75,13 +76,13 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-white font-semibold mb-4">Company</h4>
-            <ul className="space-y-2">
+            <h4 className="text-xs uppercase tracking-[0.15em] text-[#94A3B8] font-medium mb-5">Company</h4>
+            <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-slate-400 hover:text-white transition-colors text-sm"
+                    className="text-[#64748B] hover:text-[#F8FAFC] transition-colors duration-300 text-sm"
                   >
                     {link.name}
                   </Link>
@@ -91,13 +92,13 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-white font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2">
+            <h4 className="text-xs uppercase tracking-[0.15em] text-[#94A3B8] font-medium mb-5">Legal</h4>
+            <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-slate-400 hover:text-white transition-colors text-sm"
+                    className="text-[#64748B] hover:text-[#F8FAFC] transition-colors duration-300 text-sm"
                   >
                     {link.name}
                   </Link>
@@ -107,9 +108,13 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-500 text-sm">2024 TibiaEye. Todos os direitos reservados.</p>
-          <p className="text-slate-500 text-sm">Made with love in Brazil</p>
+        <div className="section-divider mt-12 mb-8" />
+
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-[#64748B] text-sm">
+            {new Date().getFullYear()} TibiaEye. Todos os direitos reservados.
+          </p>
+          <p className="text-[#64748B] text-sm">Made with love in Brazil</p>
         </div>
       </div>
     </footer>

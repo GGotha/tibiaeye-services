@@ -6,14 +6,13 @@ import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import { useState } from "react";
 
+const spring = { type: "spring" as const, stiffness: 100, damping: 20 };
+
 const plans = [
   {
     name: "Starter",
     description: "Perfeito para começar",
-    price: {
-      monthly: 0,
-      yearly: 0,
-    },
+    price: { monthly: 0, yearly: 0 },
     features: [
       "1 personagem",
       "7 dias de histórico",
@@ -27,10 +26,7 @@ const plans = [
   {
     name: "Pro",
     description: "Para hunters sérios",
-    price: {
-      monthly: 29.9,
-      yearly: 24.9,
-    },
+    price: { monthly: 29.9, yearly: 24.9 },
     features: [
       "5 personagens",
       "30 dias de histórico",
@@ -46,10 +42,7 @@ const plans = [
   {
     name: "Enterprise",
     description: "Para times e guilds",
-    price: {
-      monthly: 99.9,
-      yearly: 79.9,
-    },
+    price: { monthly: 99.9, yearly: 79.9 },
     features: [
       "Personagens ilimitados",
       "Histórico ilimitado",
@@ -83,48 +76,58 @@ export function PricingTable() {
   };
 
   return (
-    <section id="pricing" className="py-24 bg-slate-900/50">
-      <div className="max-w-6xl mx-auto px-4">
+    <section id="pricing" className="relative py-32">
+      <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-16">
           <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            className="text-emerald-400 font-semibold mb-4"
+            transition={spring}
+            className="text-xs uppercase tracking-[0.15em] text-emerald-400 font-medium mb-5"
           >
-            PRICING
+            Pricing
           </motion.p>
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold text-white mb-4"
+            transition={{ ...spring, delay: 0.05 }}
+            className="text-4xl md:text-6xl font-bold text-[#F8FAFC] tracking-[-0.03em] mb-6"
           >
             Planos simples e transparentes
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-slate-400 text-lg"
+            transition={{ ...spring, delay: 0.1 }}
+            className="text-[#94A3B8] text-lg"
           >
             Comece grátis. Upgrade quando precisar.
           </motion.p>
         </div>
 
         {/* Billing toggle */}
-        <div className="flex justify-center mb-12">
-          <div className="inline-flex items-center p-1 rounded-full bg-slate-900 border border-slate-800">
+        <div className="flex justify-center mb-16">
+          <div className="relative inline-flex items-center p-1 rounded-full bg-white/[0.04] border border-white/[0.06]">
+            {/* Sliding indicator */}
+            <motion.div
+              layout
+              className="absolute top-1 bottom-1 rounded-full bg-emerald-500"
+              style={{
+                left: billingCycle === "monthly" ? "4px" : "50%",
+                width: "calc(50% - 4px)",
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            />
             <button
               type="button"
               onClick={() => setBillingCycle("monthly")}
               className={cn(
-                "px-4 py-2 rounded-full text-sm font-medium transition-all",
-                billingCycle === "monthly"
-                  ? "bg-emerald-500 text-black"
-                  : "text-slate-400 hover:text-white"
+                "relative z-10 px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200",
+                billingCycle === "monthly" ? "text-black" : "text-[#94A3B8]"
               )}
             >
               Mensal
@@ -133,14 +136,19 @@ export function PricingTable() {
               type="button"
               onClick={() => setBillingCycle("yearly")}
               className={cn(
-                "px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2",
-                billingCycle === "yearly"
-                  ? "bg-emerald-500 text-black"
-                  : "text-slate-400 hover:text-white"
+                "relative z-10 px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200 flex items-center gap-2",
+                billingCycle === "yearly" ? "text-black" : "text-[#94A3B8]"
               )}
             >
               Anual
-              <span className="text-xs bg-emerald-400/20 text-emerald-400 px-2 py-0.5 rounded-full">
+              <span
+                className={cn(
+                  "text-xs px-2 py-0.5 rounded-full transition-colors duration-200",
+                  billingCycle === "yearly"
+                    ? "bg-black/20 text-black"
+                    : "bg-emerald-500/15 text-emerald-400"
+                )}
+              >
                 -17%
               </span>
             </button>
@@ -148,49 +156,59 @@ export function PricingTable() {
         </div>
 
         {/* Plans */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-5">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 30, scale: 0.95, filter: "blur(10px)" }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ ...spring, delay: index * 0.1 }}
               className={cn(
-                "relative p-8 rounded-2xl border transition-all",
+                "relative p-8 rounded-2xl transition-all",
                 plan.popular
-                  ? "bg-gradient-to-b from-emerald-950/50 to-slate-900 border-emerald-500/50 scale-105"
-                  : "bg-slate-900/50 border-slate-800 hover:border-slate-700"
+                  ? "gradient-border glass-card shadow-[0_0_60px_-15px_rgba(16,185,129,0.15)]"
+                  : "glass-card-hover"
               )}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500 text-black text-sm font-semibold">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 text-black text-xs font-semibold">
                     <Sparkles className="h-3 w-3" />
                     Mais Popular
                   </div>
                 </div>
               )}
 
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold text-white mb-1">{plan.name}</h3>
-                <p className="text-slate-400 text-sm">{plan.description}</p>
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold text-[#F8FAFC] mb-1 tracking-[-0.01em]">
+                  {plan.name}
+                </h3>
+                <p className="text-[#64748B] text-sm">{plan.description}</p>
               </div>
 
-              <div className="mb-6">
+              <div className="mb-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-white">
+                  <motion.span
+                    key={`${plan.name}-${billingCycle}`}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    className="text-5xl font-bold text-[#F8FAFC] tracking-[-0.03em]"
+                  >
                     R${plan.price[billingCycle].toFixed(2).replace(".", ",")}
-                  </span>
-                  {plan.price.monthly > 0 && <span className="text-slate-400">/mês</span>}
+                  </motion.span>
+                  {plan.price.monthly > 0 && (
+                    <span className="text-[#64748B] text-sm">/mês</span>
+                  )}
                 </div>
               </div>
 
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3 text-slate-300">
+                  <li key={feature} className="flex items-center gap-3">
                     <Check className="h-4 w-4 text-emerald-500 flex-shrink-0" />
-                    {feature}
+                    <span className="text-[#94A3B8] text-sm">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -198,10 +216,10 @@ export function PricingTable() {
               <Button
                 onClick={() => handleCheckout(plan.name)}
                 className={cn(
-                  "w-full",
+                  "w-full transition-all duration-300",
                   plan.popular
-                    ? "bg-emerald-500 hover:bg-emerald-600 text-black"
-                    : "bg-slate-800 hover:bg-slate-700 text-white"
+                    ? "bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_-5px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_-5px_rgba(16,185,129,0.5)]"
+                    : "bg-white/[0.06] hover:bg-white/[0.1] text-[#F8FAFC] border border-white/[0.06]"
                 )}
                 size="lg"
               >

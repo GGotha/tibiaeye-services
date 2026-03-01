@@ -5,31 +5,41 @@ import { motion } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
 import Link from "next/link";
 
+const spring = { type: "spring" as const, stiffness: 100, damping: 20 };
+
+const blurIn = (delay: number) => ({
+  initial: { opacity: 0, y: 20, filter: "blur(10px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  transition: { ...spring, delay },
+});
+
+const chartHeights = [65, 72, 58, 85, 78, 92, 68, 75, 88, 62, 95, 70, 82, 55, 90, 73, 80, 67, 85, 60, 77, 93, 69, 84];
+
+const stats = [
+  { label: "XP/h", value: "1.2M" },
+  { label: "Kills", value: "847" },
+  { label: "Loot", value: "45.2k" },
+  { label: "Tempo", value: "2h 34m" },
+];
+
 export function Hero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950" />
+      {/* Deep background */}
+      <div className="absolute inset-0 bg-[#06060B]" />
 
-      {/* Animated grid */}
-      <div
-        className="absolute inset-0 bg-center opacity-20"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2310b981' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}
-      />
+      {/* Radial top glow */}
+      <div className="absolute inset-0 bg-radial-hero" />
 
-      {/* Glow effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl" />
+      {/* Aurora orbs */}
+      <div className="absolute top-[-10%] left-[15%] w-[500px] h-[500px] rounded-full bg-emerald-500/[0.07] blur-[120px] animate-aurora" />
+      <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] rounded-full bg-cyan-500/[0.06] blur-[120px] animate-aurora-reverse" />
+      <div className="absolute bottom-[10%] left-[40%] w-[450px] h-[450px] rounded-full bg-violet-500/[0.05] blur-[120px] animate-aurora-slow" />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 text-center">
+      {/* Content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-8"
-        >
+        <motion.div {...blurIn(0)} className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] mb-10">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -39,13 +49,11 @@ export function Hero() {
 
         {/* Headline */}
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6"
+          {...blurIn(0.1)}
+          className="text-6xl md:text-8xl font-bold tracking-[-0.04em] text-[#F8FAFC] mb-8 leading-[0.95]"
         >
           Bot de Tibia com{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-400 bg-[length:200%_auto] animate-gradient-shift">
             Dashboard
           </span>
           <br />
@@ -54,25 +62,21 @@ export function Hero() {
 
         {/* Subheadline */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-xl text-slate-400 max-w-2xl mx-auto mb-10"
+          {...blurIn(0.2)}
+          className="text-xl text-[#94A3B8] max-w-2xl mx-auto mb-12 leading-relaxed"
         >
-          Pixel bot que automatiza suas hunts enquanto você acompanha tudo pelo dashboard. XP/h,
-          kills, loot e posição no mapa - tudo ao vivo, de qualquer lugar.
+          Pixel bot que automatiza suas hunts enquanto você acompanha tudo pelo dashboard.
+          XP/h, kills, loot e posição no mapa — tudo ao vivo, de qualquer lugar.
         </motion.p>
 
         {/* CTAs */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          {...blurIn(0.3)}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
           <Button
             size="lg"
-            className="bg-emerald-500 hover:bg-emerald-600 text-black font-semibold px-8"
+            className="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold px-8 shadow-[0_0_30px_-5px_rgba(16,185,129,0.4)] hover:shadow-[0_0_40px_-5px_rgba(16,185,129,0.5)] transition-all duration-300"
             asChild
           >
             <Link href="https://app.tibiaeye.com/auth/signup">
@@ -83,7 +87,7 @@ export function Hero() {
           <Button
             size="lg"
             variant="outline"
-            className="border-slate-700 text-white hover:bg-slate-800"
+            className="border-white/[0.1] text-white hover:bg-white/[0.04] hover:border-white/[0.15] transition-all duration-300"
           >
             <Play className="mr-2 h-4 w-4" />
             Ver Demo
@@ -92,50 +96,109 @@ export function Hero() {
 
         {/* Social proof */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-16 flex items-center justify-center gap-8 text-slate-500"
+          {...blurIn(0.45)}
+          className="mt-14 flex items-center justify-center gap-6"
         >
-          <div className="flex -space-x-2">
-            {[1, 2, 3, 4, 5].map((i) => (
+          <div className="flex -space-x-2.5">
+            {[
+              "from-emerald-400 to-cyan-400",
+              "from-cyan-400 to-blue-400",
+              "from-blue-400 to-violet-400",
+              "from-violet-400 to-pink-400",
+              "from-pink-400 to-emerald-400",
+            ].map((gradient, i) => (
               <div
                 key={i}
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 border-2 border-slate-900"
+                className={`w-8 h-8 rounded-full bg-gradient-to-br ${gradient} border-2 border-[#06060B]`}
               />
             ))}
           </div>
-          <p className="text-sm">
-            <span className="text-white font-semibold">2,500+</span> players ativos
+          <p className="text-sm text-[#64748B]">
+            <span className="text-[#F8FAFC] font-semibold">2,500+</span> players ativos
           </p>
         </motion.div>
 
         {/* Dashboard preview */}
         <motion.div
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="mt-16 w-full max-w-5xl mx-auto"
+          initial={{ opacity: 0, y: 80, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ ...spring, delay: 0.6 }}
+          className="mt-20 w-full max-w-5xl mx-auto"
         >
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10 pointer-events-none" />
-            <div className="rounded-t-xl border border-slate-800 shadow-2xl bg-slate-900/50 p-4 md:p-8">
-              {/* Mock Dashboard */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                {[
-                  { label: "XP/h", value: "1.2M" },
-                  { label: "Kills", value: "847" },
-                  { label: "Loot", value: "45.2k" },
-                  { label: "Tempo", value: "2h 34m" },
-                ].map((stat) => (
-                  <div key={stat.label} className="bg-slate-800/50 rounded-lg p-4 text-center">
-                    <p className="text-slate-400 text-xs mb-1">{stat.label}</p>
-                    <p className="text-emerald-400 text-2xl font-bold">{stat.value}</p>
-                  </div>
+          <div className="relative" style={{ perspective: "1200px" }}>
+            {/* Bottom fade */}
+            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#06060B] via-[#06060B]/80 to-transparent z-20 pointer-events-none" />
+
+            {/* Dashboard card */}
+            <div
+              className="rounded-2xl border border-white/[0.06] bg-[#0C0C14] p-5 md:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5),0_0_100px_-20px_rgba(16,185,129,0.08)]"
+              style={{
+                transform: "rotateX(5deg)",
+                transformOrigin: "center bottom",
+              }}
+            >
+              {/* Window chrome */}
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+                <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+                <div className="ml-4 flex-1 h-7 rounded-lg bg-white/[0.04] flex items-center px-3">
+                  <span className="text-xs text-[#64748B]">app.tibiaeye.com/dashboard</span>
+                </div>
+              </div>
+
+              {/* Stats grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                {stats.map((stat, i) => (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ ...spring, delay: 0.8 + i * 0.08 }}
+                    className="bg-white/[0.03] border border-white/[0.04] rounded-xl p-4 text-center"
+                  >
+                    <p className="text-[#64748B] text-xs mb-1.5 uppercase tracking-wider">{stat.label}</p>
+                    <p className="text-emerald-400 text-2xl md:text-3xl font-bold font-mono tabular-nums">
+                      {stat.value}
+                    </p>
+                  </motion.div>
                 ))}
               </div>
-              <div className="h-32 md:h-48 bg-slate-800/50 rounded-lg flex items-center justify-center">
-                <div className="text-slate-500 text-sm">Gráfico de XP em tempo real</div>
+
+              {/* Chart */}
+              <div className="bg-white/[0.03] border border-white/[0.04] rounded-xl p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[#F8FAFC] text-sm font-medium">XP ao longo do tempo</span>
+                  <div className="flex gap-1.5">
+                    {["1h", "6h", "24h"].map((period) => (
+                      <span
+                        key={period}
+                        className={`px-2.5 py-1 rounded-md text-xs ${
+                          period === "1h"
+                            ? "bg-emerald-500/15 text-emerald-400"
+                            : "text-[#64748B]"
+                        }`}
+                      >
+                        {period}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="h-32 md:h-44 flex items-end gap-[3px]">
+                  {chartHeights.map((height, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ height: 0 }}
+                      animate={{ height: `${height}%` }}
+                      transition={{
+                        duration: 0.6,
+                        delay: 1.0 + i * 0.03,
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                      }}
+                      className="flex-1 rounded-t bg-gradient-to-t from-emerald-500/40 to-emerald-500/10"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>

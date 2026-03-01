@@ -15,9 +15,15 @@ export const UserProfileSchema = z.object({
   createdAt: z.string().datetime(),
 });
 
+export const UpdatePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(6),
+});
+
 export const MessageResponseSchema = z.object({
   message: z.string(),
 });
 
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
+export type UpdatePasswordInput = z.infer<typeof UpdatePasswordSchema>;
 export type UserProfile = z.infer<typeof UserProfileSchema>;

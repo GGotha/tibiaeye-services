@@ -1,5 +1,6 @@
+import { MetricCard } from "@/components/cards/metric-card";
 import { RealtimeBots } from "@/components/charts/realtime-bots";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionLabel } from "@/components/ui/section-label";
 import { useActiveBotsCount, usePlatformStats } from "@/hooks/use-platform-analytics";
 import { formatNumber } from "@/lib/utils";
 import { createFileRoute } from "@tanstack/react-router";
@@ -14,71 +15,73 @@ function BotsOnlinePage() {
   const { data: stats } = usePlatformStats();
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Live Bots</h1>
+    <div className="space-y-5">
+      <div
+        className="flex items-center justify-between opacity-0 animate-fade-in"
+        style={{ animationDelay: "0ms", animationFillMode: "forwards" }}
+      >
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest text-slate-500">
+            Monitoramento
+          </p>
+          <h1 className="text-2xl font-bold text-white mt-0.5">Bots ao Vivo</h1>
+        </div>
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-sm text-emerald-400">Live - Updates every 5s</span>
+          <span className="text-sm text-emerald-400">Ao vivo - Atualiza a cada 5s</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <RealtimeBots />
-
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-400">Sessions Today</CardTitle>
-            <Activity className="h-4 w-4 text-red-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-white">
-              {stats ? formatNumber(stats.usage.sessionsToday) : "-"}
-            </div>
-            <p className="text-xs text-slate-500">Total sessions started</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-400">Peak Today</CardTitle>
-            <TrendingUp className="h-4 w-4 text-red-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-white">
-              {botsData ? formatNumber(botsData.peak) : "-"}
-            </div>
-            <p className="text-xs text-slate-500">Maximum concurrent bots</p>
-          </CardContent>
-        </Card>
+      <div
+        className="opacity-0 animate-fade-in"
+        style={{ animationDelay: "60ms", animationFillMode: "forwards" }}
+      >
+        <SectionLabel>Tempo Real</SectionLabel>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+          <RealtimeBots />
+          <MetricCard
+            title="Sessoes Hoje"
+            value={stats?.usage ? formatNumber(stats.usage.sessionsToday) : "-"}
+            icon={Activity}
+            description="Total iniciadas"
+            borderColor="border-t-orange-500/50"
+          />
+          <MetricCard
+            title="Pico Hoje"
+            value={botsData ? formatNumber(botsData.peak) : "-"}
+            icon={TrendingUp}
+            description="Maximo simultaneo"
+            borderColor="border-t-red-500/50"
+          />
+        </div>
       </div>
 
-      <Card className="bg-slate-900 border-slate-800">
-        <CardHeader>
-          <CardTitle className="text-white">About Live Monitoring</CardTitle>
-        </CardHeader>
-        <CardContent className="text-slate-400">
+      <div
+        className="opacity-0 animate-fade-in"
+        style={{ animationDelay: "120ms", animationFillMode: "forwards" }}
+      >
+        <SectionLabel>Sobre o Monitoramento</SectionLabel>
+        <div className="glass rounded-xl p-6 mt-2 text-slate-400 text-sm">
           <p>
-            This page shows real-time statistics about active bots on the platform. The data
-            refreshes automatically every 5 seconds to give you an up-to-date view of platform
-            activity.
+            Esta pagina mostra estatisticas em tempo real dos bots ativos na plataforma. Os dados
+            atualizam automaticamente a cada 5 segundos.
           </p>
           <ul className="mt-4 space-y-2">
             <li className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-red-400" />
-              <span>Bots Online: Currently running hunting sessions</span>
+              <span>Bots Online: Sessoes de hunt em execucao</span>
             </li>
             <li className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-red-400" />
-              <span>Sessions Today: Total sessions initiated in the last 24 hours</span>
+              <span>Sessoes Hoje: Total de sessoes iniciadas nas ultimas 24h</span>
             </li>
             <li className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-red-400" />
-              <span>Peak Today: Highest number of concurrent bots in the last 24 hours</span>
+              <span>Pico Hoje: Maior numero de bots simultaneos nas ultimas 24h</span>
             </li>
           </ul>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

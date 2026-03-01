@@ -1,10 +1,13 @@
 import { useAdminAuth } from "@/contexts/admin-auth-context";
-import { Navigate, Outlet } from "@tanstack/react-router";
+import { Navigate, Outlet, useLocation } from "@tanstack/react-router";
+import { useState } from "react";
 import { AdminHeader } from "./admin-header";
 import { AdminSidebar } from "./admin-sidebar";
 
 export function AdminDashboardLayout() {
   const { isAuthenticated, isLoading } = useAdminAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -19,11 +22,11 @@ export function AdminDashboardLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <AdminSidebar />
-      <div className="ml-64">
-        <AdminHeader />
-        <main className="p-6">
+    <div className="min-h-screen bg-slate-950 bg-dot-pattern">
+      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="md:ml-64">
+        <AdminHeader onOpenSidebar={() => setSidebarOpen(true)} />
+        <main key={location.pathname} className="p-6 animate-fade-in">
           <Outlet />
         </main>
       </div>

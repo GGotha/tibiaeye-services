@@ -15,6 +15,8 @@ import {
   RouteEntity,
   GameEventEntity,
   BotConfigEntity,
+  FeatureFlagEntity,
+  SystemSettingEntity,
 } from "../entities/index.js";
 
 export const dataSource = new DataSource({
@@ -39,9 +41,11 @@ export const dataSource = new DataSource({
     RouteEntity,
     GameEventEntity,
     BotConfigEntity,
+    FeatureFlagEntity,
+    SystemSettingEntity,
   ],
   synchronize: env.NODE_ENV === "development",
   migrations: ["dist/migrations/*.js"],
-  migrationsRun: true,
+  migrationsRun: env.NODE_ENV === "production",
   logging: env.NODE_ENV === "development",
 });

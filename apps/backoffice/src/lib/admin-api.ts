@@ -51,10 +51,10 @@ class AdminApiClient {
 
   // Auth
   async login(email: string, password: string) {
-    const { data } = await this.client.post<{ user: AdminUser }>(
-      "/api/v1/auth/login",
-      { email, password }
-    );
+    const { data } = await this.client.post<{ user: AdminUser }>("/api/v1/auth/login", {
+      email,
+      password,
+    });
 
     if (data.user.role !== "admin") {
       // Clear the cookie by calling logout
@@ -184,6 +184,14 @@ class AdminApiClient {
       "/api/v1/admin/licenses/bulk-extend",
       { ids, days }
     );
+    return data;
+  }
+
+  async givePlan(userId: string, planId: string, durationDays: number) {
+    const { data } = await this.client.post<License>(`/api/v1/admin/users/${userId}/give-plan`, {
+      planId,
+      durationDays,
+    });
     return data;
   }
 

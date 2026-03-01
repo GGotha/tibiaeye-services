@@ -1,10 +1,34 @@
 import type { Repository } from "typeorm";
-import { Like } from "typeorm";
+import { ILike } from "typeorm";
 import { UserEntity, UserStatus } from "../../../entities/user.entity.js";
 import { SubscriptionEntity } from "../../../entities/subscription.entity.js";
 import { CharacterEntity } from "../../../entities/character.entity.js";
 import { SessionEntity } from "../../../entities/session.entity.js";
-import type { UserListQuery, AdminUser } from "../schemas.js";
+import type { UserListQuery } from "../schemas.js";
+
+type SubscriptionStatusType = "active" | "cancelled" | "past_due" | "none";
+
+interface UserItem {
+  id: string;
+  email: string;
+  name: string | null;
+  avatar: string | null;
+  role: "user" | "admin";
+  status: "active" | "suspended" | "banned";
+  createdAt: string;
+  lastLoginAt: string | null;
+  subscriptionStatus: SubscriptionStatusType;
+  charactersCount: number;
+  sessionsCount: number;
+}
+
+interface PaginatedUsersResult {
+  data: UserItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 export class ListUsersUseCase {
   constructor(
@@ -14,25 +38,36 @@ export class ListUsersUseCase {
     private readonly sessionRepo: Repository<SessionEntity>,
   ) {}
 
-  async execute(query: UserListQuery): Promise<AdminUser[]> {
-    const where: Record<string, unknown> = {};
-
-    if (query.search) {
-      where.email = Like(`%${query.search}%`);
-    }
+  async execute(query: UserListQuery): Promise<PaginatedUsersResult> {
+    const where: Array<Record<string, unknown>> = [];
+    const baseWhere: Record<string, unknown> = {};
 
     if (query.status) {
-      where.status = query.status as UserStatus;
+      baseWhere.status = query.status as UserStatus;
     }
 
-    const users = await this.userRepo.find({
-      where,
-      order: { createdAt: "DESC" },
+    if (query.search) {
+      // Search by name OR email
+      const nameWhere = { ...baseWhere, name: ILike(`%${query.search}%`) };
+      const emailWhere = { ...baseWhere, email: ILike(`%${query.search}%`) };
+      where.push(nameWhere, emailWhere);
+    } else {
+      where.push(baseWhere);
+    }
+
+    const orderField = query.sortBy || "createdAt";
+    const orderDir = (query.sortOrder || "desc").toUpperCase() as "ASC" | "DESC";
+
+    const skip = (query.page - 1) * query.limit;
+
+    const [users, total] = await this.userRepo.findAndCount({
+      where: where.length === 1 ? where[0] : where,
+      order: { [orderField]: orderDir },
       take: query.limit,
-      skip: query.offset,
+      skip,
     });
 
-    const results: AdminUser[] = [];
+    const data = [];
 
     for (const user of users) {
       const [subscription, charactersCount, sessionsCount] = await Promise.all([
@@ -44,27 +79,38 @@ export class ListUsersUseCase {
         this.getSessionsCount(user.id),
       ]);
 
-      results.push({
+      let subscriptionStatus: SubscriptionStatusType = "none";
+      if (subscription) {
+        subscriptionStatus = subscription.status as SubscriptionStatusType;
+      }
+
+      // Filter by subscriptionStatus if specified
+      if (query.subscriptionStatus && subscriptionStatus !== query.subscriptionStatus) {
+        continue;
+      }
+
+      data.push({
         id: user.id,
         email: user.email,
         name: user.name,
+        avatar: user.avatar,
         role: user.role,
         status: user.status,
         createdAt: user.createdAt.toISOString(),
-        subscription: subscription
-          ? {
-              id: subscription.id,
-              planName: subscription.plan.name,
-              status: subscription.status,
-              currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
-            }
-          : null,
+        lastLoginAt: null as string | null,
+        subscriptionStatus,
         charactersCount,
         sessionsCount,
       });
     }
 
-    return results;
+    return {
+      data,
+      total,
+      page: query.page,
+      limit: query.limit,
+      totalPages: Math.ceil(total / query.limit),
+    };
   }
 
   private async getSessionsCount(userId: string): Promise<number> {

@@ -1,5 +1,5 @@
 import { MetricCard } from "@/components/cards/metric-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionLabel } from "@/components/ui/section-label";
 import { usePlatformStats } from "@/hooks/use-platform-analytics";
 import { formatNumber } from "@/lib/utils";
 import { createFileRoute } from "@tanstack/react-router";
@@ -20,94 +20,94 @@ function PerformancePage() {
     );
   }
 
+  const healthItems = [
+    { name: "Servidor API", status: "Saudavel", color: "bg-emerald-500" },
+    { name: "Banco de Dados", status: "Conectado", color: "bg-emerald-500" },
+    { name: "WebSocket", status: "Ativo", color: "bg-emerald-500" },
+    { name: "Gateway de Pagamento", status: "Ativo", color: "bg-emerald-500" },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Performance Metrics</h1>
+    <div className="space-y-5">
+      <div
+        className="opacity-0 animate-fade-in"
+        style={{ animationDelay: "0ms", animationFillMode: "forwards" }}
+      >
+        <p className="text-xs font-medium uppercase tracking-widest text-slate-500">
+          Monitoramento
+        </p>
+        <h1 className="text-2xl font-bold text-white mt-0.5">Performance</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="API Requests Today"
-          value={stats ? formatNumber(stats.usage.apiRequestsToday) : "-"}
-          icon={Database}
-          description="Total API calls"
-        />
-        <MetricCard
-          title="Active Users"
-          value={stats ? formatNumber(stats.users.activeToday) : "-"}
-          icon={Activity}
-          description="Users active today"
-        />
-        <MetricCard
-          title="Sessions Today"
-          value={stats ? formatNumber(stats.usage.sessionsToday) : "-"}
-          icon={Zap}
-          description="Hunting sessions"
-        />
-        <MetricCard
-          title="Peak Concurrent"
-          value={stats ? formatNumber(stats.usage.peakConcurrentBots) : "-"}
-          icon={Clock}
-          description="Maximum today"
-        />
+      <div
+        className="opacity-0 animate-fade-in"
+        style={{ animationDelay: "60ms", animationFillMode: "forwards" }}
+      >
+        <SectionLabel>Metricas</SectionLabel>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-2">
+          <MetricCard
+            title="Requisicoes API"
+            value={stats?.usage ? formatNumber(stats.usage.apiRequestsToday) : "-"}
+            icon={Database}
+            description="Total hoje"
+            borderColor="border-t-orange-500/50"
+          />
+          <MetricCard
+            title="Usuarios Ativos"
+            value={stats?.users ? formatNumber(stats.users.activeToday) : "-"}
+            icon={Activity}
+            description="Ativos hoje"
+            borderColor="border-t-emerald-500/50"
+          />
+          <MetricCard
+            title="Sessoes Hoje"
+            value={stats?.usage ? formatNumber(stats.usage.sessionsToday) : "-"}
+            icon={Zap}
+            description="Sessoes de hunt"
+            borderColor="border-t-red-500/50"
+          />
+          <MetricCard
+            title="Pico Concorrente"
+            value={stats?.usage ? formatNumber(stats.usage.peakConcurrentBots) : "-"}
+            icon={Clock}
+            description="Maximo hoje"
+            borderColor="border-t-blue-500/50"
+          />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Zap className="h-5 w-5 text-red-400" />
-              System Health
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-slate-800 rounded">
-              <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-emerald-500" />
-                <span className="text-slate-300">API Server</span>
+      <div
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4 opacity-0 animate-fade-in"
+        style={{ animationDelay: "120ms", animationFillMode: "forwards" }}
+      >
+        <div>
+          <SectionLabel>Saude do Sistema</SectionLabel>
+          <div className="glass rounded-xl p-6 mt-2 space-y-3">
+            {healthItems.map((item) => (
+              <div
+                key={item.name}
+                className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`h-3 w-3 rounded-full ${item.color} animate-pulse`} />
+                  <span className="text-slate-300 text-sm">{item.name}</span>
+                </div>
+                <span className="text-emerald-400 text-sm">{item.status}</span>
               </div>
-              <span className="text-emerald-400">Healthy</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-slate-800 rounded">
-              <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-emerald-500" />
-                <span className="text-slate-300">Database</span>
-              </div>
-              <span className="text-emerald-400">Connected</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-slate-800 rounded">
-              <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-emerald-500" />
-                <span className="text-slate-300">WebSocket Server</span>
-              </div>
-              <span className="text-emerald-400">Running</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-slate-800 rounded">
-              <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-emerald-500" />
-                <span className="text-slate-300">Payment Gateway</span>
-              </div>
-              <span className="text-emerald-400">Active</span>
-            </div>
-          </CardContent>
-        </Card>
+            ))}
+          </div>
+        </div>
 
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-400" />
-              Recent Alerts
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div>
+          <SectionLabel>Alertas Recentes</SectionLabel>
+          <div className="glass rounded-xl p-6 mt-2">
             <div className="text-center py-8 text-slate-400">
-              <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-slate-600" />
-              <p>No recent alerts</p>
-              <p className="text-sm text-slate-500">All systems operating normally</p>
+              <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-slate-600" />
+              <p className="text-sm">Nenhum alerta recente</p>
+              <p className="text-xs text-slate-500 mt-1">Todos os sistemas operando normalmente</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

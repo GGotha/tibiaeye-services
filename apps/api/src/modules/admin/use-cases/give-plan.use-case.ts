@@ -18,7 +18,7 @@ export class GivePlanUseCase {
   async execute(
     userId: string,
     input: GivePlanInput,
-  ): Promise<{ message: string; licenseKey: string }> {
+  ): Promise<{ message: string; licenseKey: string; id: string; keyPrefix: string }> {
     const user = await this.userRepo.findOne({
       where: { id: userId },
     });
@@ -66,14 +66,16 @@ export class GivePlanUseCase {
 
     // Generate license key
     const generateLicenseUseCase = new GenerateLicenseUseCase(this.licenseKeyRepo);
-    const { licenseKey } = await generateLicenseUseCase.execute({
+    const result = await generateLicenseUseCase.execute({
       userId,
       subscriptionId: subscription.id,
     });
 
     return {
       message: `Gave ${plan.name} plan to user for ${input.durationDays} days`,
-      licenseKey,
+      licenseKey: result.licenseKey,
+      id: result.id,
+      keyPrefix: result.keyPrefix,
     };
   }
 }

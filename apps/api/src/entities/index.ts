@@ -16,3 +16,5 @@ export {
 export { RouteEntity, type RouteWaypoint } from "./route.entity.js";
 export { GameEventEntity } from "./game-event.entity.js";
 export { BotConfigEntity } from "./bot-config.entity.js";
+export { FeatureFlagEntity } from "./feature-flag.entity.js";
+export { SystemSettingEntity } from "./system-setting.entity.js";

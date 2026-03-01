@@ -1,5 +1,6 @@
 import { MetricCard } from "@/components/cards/metric-card";
 import { UsageChart } from "@/components/charts/usage-chart";
+import { SectionLabel } from "@/components/ui/section-label";
 import {
   Select,
   SelectContent,
@@ -23,56 +24,80 @@ function UsagePage() {
   const { data: usageData, isLoading } = useUsageData(period);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Platform Usage</h1>
+    <div className="space-y-5">
+      <div
+        className="flex items-center justify-between opacity-0 animate-fade-in"
+        style={{ animationDelay: "0ms", animationFillMode: "forwards" }}
+      >
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest text-slate-500">Analytics</p>
+          <h1 className="text-2xl font-bold text-white mt-0.5">Uso da Plataforma</h1>
+        </div>
         <Select value={period} onValueChange={(v) => setPeriod(v as typeof period)}>
           <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700 text-white">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-slate-900 border-slate-800">
-            <SelectItem value="7d">Last 7 days</SelectItem>
-            <SelectItem value="30d">Last 30 days</SelectItem>
-            <SelectItem value="90d">Last 90 days</SelectItem>
-            <SelectItem value="1y">Last year</SelectItem>
+            <SelectItem value="7d">Ultimos 7 dias</SelectItem>
+            <SelectItem value="30d">Ultimos 30 dias</SelectItem>
+            <SelectItem value="90d">Ultimos 90 dias</SelectItem>
+            <SelectItem value="1y">Ultimo ano</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="Sessions Today"
-          value={stats ? formatNumber(stats.usage.sessionsToday) : "-"}
-          icon={Activity}
-          description="Hunting sessions"
-        />
-        <MetricCard
-          title="API Requests Today"
-          value={stats ? formatNumber(stats.usage.apiRequestsToday) : "-"}
-          icon={Database}
-          description="Total API calls"
-        />
-        <MetricCard
-          title="Avg Session Duration"
-          value={stats ? formatDuration(stats.usage.avgSessionDuration) : "-"}
-          icon={Clock}
-          description="Average per session"
-        />
-        <MetricCard
-          title="Peak Concurrent Bots"
-          value={stats ? formatNumber(stats.usage.peakConcurrentBots) : "-"}
-          icon={Users}
-          description="Today's peak"
-        />
+      <div
+        className="opacity-0 animate-fade-in"
+        style={{ animationDelay: "60ms", animationFillMode: "forwards" }}
+      >
+        <SectionLabel>Metricas de Uso</SectionLabel>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-2">
+          <MetricCard
+            title="Sessoes Hoje"
+            value={stats?.usage ? formatNumber(stats.usage.sessionsToday) : "-"}
+            icon={Activity}
+            description="Sessoes de hunt"
+            borderColor="border-t-red-500/50"
+          />
+          <MetricCard
+            title="Requisicoes API"
+            value={stats?.usage ? formatNumber(stats.usage.apiRequestsToday) : "-"}
+            icon={Database}
+            description="Total hoje"
+            borderColor="border-t-orange-500/50"
+          />
+          <MetricCard
+            title="Duracao Media"
+            value={stats?.usage ? formatDuration(stats.usage.avgSessionDuration) : "-"}
+            icon={Clock}
+            description="Por sessao"
+            borderColor="border-t-blue-500/50"
+          />
+          <MetricCard
+            title="Pico Concorrente"
+            value={stats?.usage ? formatNumber(stats.usage.peakConcurrentBots) : "-"}
+            icon={Users}
+            description="Bots simultaneos"
+            borderColor="border-t-emerald-500/50"
+          />
+        </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-red-500 border-t-transparent" />
+      <div
+        className="opacity-0 animate-fade-in"
+        style={{ animationDelay: "120ms", animationFillMode: "forwards" }}
+      >
+        <SectionLabel>Atividade</SectionLabel>
+        <div className="mt-2">
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-red-500 border-t-transparent" />
+            </div>
+          ) : (
+            <UsageChart data={usageData || []} title="Atividade da Plataforma" />
+          )}
         </div>
-      ) : (
-        <UsageChart data={usageData || []} title="Platform Activity" />
-      )}
+      </div>
     </div>
   );
 }

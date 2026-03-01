@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { Bot, Monitor, Wifi } from "lucide-react";
 
+const spring = { type: "spring" as const, stiffness: 100, damping: 20 };
+
 const features = [
   {
     icon: Bot,
@@ -26,54 +28,62 @@ const features = [
 
 export function WhatIsIt() {
   return (
-    <section className="py-24 bg-slate-900/50">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="text-center mb-16">
+    <section className="relative py-32">
+      <div className="section-divider" />
+
+      <div className="max-w-7xl mx-auto px-6 pt-32">
+        {/* Header - left aligned */}
+        <div className="max-w-3xl mb-20">
           <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            className="text-emerald-400 font-semibold mb-4"
+            transition={spring}
+            className="text-xs uppercase tracking-[0.15em] text-emerald-400 font-medium mb-5"
           >
-            O QUE É O TIBIAEYE?
+            Produto
           </motion.p>
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold text-white mb-4"
+            transition={{ ...spring, delay: 0.05 }}
+            className="text-4xl md:text-6xl font-bold text-[#F8FAFC] tracking-[-0.03em] mb-6"
           >
             Bot de Tibia com Dashboard
             <br />
             em Tempo Real
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-slate-400 text-lg max-w-2xl mx-auto"
+            transition={{ ...spring, delay: 0.1 }}
+            className="text-[#94A3B8] text-lg leading-relaxed"
           >
-            TibiaEye é um pixel bot que automatiza suas hunts, looting e navegação, enquanto você
-            acompanha tudo em tempo real através de um dashboard moderno.
+            TibiaEye é um pixel bot que automatiza suas hunts, looting e navegação, enquanto
+            você acompanha tudo em tempo real através de um dashboard moderno.
           </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        {/* Feature cards */}
+        <div className="grid md:grid-cols-3 gap-5">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(10px)" }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="text-center"
+              transition={{ ...spring, delay: index * 0.1 }}
+              className="glass-card-hover rounded-2xl p-8"
             >
-              <div className="inline-flex p-4 rounded-2xl bg-emerald-500/10 mb-4">
-                <feature.icon className="h-8 w-8 text-emerald-400" />
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
+                <feature.icon className="h-6 w-6 text-emerald-400" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
-              <p className="text-slate-400">{feature.description}</p>
+              <h3 className="text-xl font-semibold text-[#F8FAFC] mb-3 tracking-[-0.01em]">
+                {feature.title}
+              </h3>
+              <p className="text-[#94A3B8] leading-relaxed">{feature.description}</p>
             </motion.div>
           ))}
         </div>

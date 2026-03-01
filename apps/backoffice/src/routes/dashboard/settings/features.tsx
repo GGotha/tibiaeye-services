@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SectionLabel } from "@/components/ui/section-label";
 import { Switch } from "@/components/ui/switch";
 import {
   useFeatureFlags,
@@ -55,26 +55,32 @@ function FeaturesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Feature Flags & Settings</h1>
+    <div className="space-y-5">
+      <div
+        className="opacity-0 animate-fade-in"
+        style={{ animationDelay: "0ms", animationFillMode: "forwards" }}
+      >
+        <p className="text-xs font-medium uppercase tracking-widest text-slate-500">
+          Configuracoes
+        </p>
+        <h1 className="text-2xl font-bold text-white mt-0.5">Feature Flags</h1>
       </div>
 
-      <Card className="bg-slate-900 border-slate-800">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+      <div
+        className="opacity-0 animate-fade-in"
+        style={{ animationDelay: "60ms", animationFillMode: "forwards" }}
+      >
+        <SectionLabel>Modo de Manutencao</SectionLabel>
+        <div className="glass rounded-xl p-6 mt-2 space-y-4">
+          <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="h-5 w-5 text-yellow-400" />
-            Maintenance Mode
-          </CardTitle>
-          <CardDescription className="text-slate-400">
-            Enable maintenance mode to prevent users from accessing the platform
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+            <p className="text-sm text-slate-400">Impede usuarios de acessar a plataforma</p>
+          </div>
+
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label className="text-slate-300">Enable Maintenance Mode</Label>
-              <p className="text-sm text-slate-500">Users will see a maintenance message</p>
+              <Label className="text-slate-300">Ativar Manutencao</Label>
+              <p className="text-xs text-slate-500">Usuarios verao uma mensagem de manutencao</p>
             </div>
             <Switch
               checked={maintenanceEnabled}
@@ -86,13 +92,13 @@ function FeaturesPage() {
           {maintenanceEnabled && (
             <div className="space-y-2">
               <Label htmlFor="message" className="text-slate-300">
-                Maintenance Message
+                Mensagem
               </Label>
               <Input
                 id="message"
                 value={maintenanceMessage}
                 onChange={(e) => setMaintenanceMessage(e.target.value)}
-                placeholder="We're performing scheduled maintenance..."
+                placeholder="Estamos em manutencao programada..."
                 className="bg-slate-800 border-slate-700 text-white"
               />
             </div>
@@ -103,32 +109,34 @@ function FeaturesPage() {
             className="bg-yellow-500 hover:bg-yellow-600 text-black"
             disabled={setMaintenanceMode.isPending}
           >
-            {setMaintenanceMode.isPending ? "Saving..." : "Save Maintenance Settings"}
+            {setMaintenanceMode.isPending ? "Salvando..." : "Salvar"}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="bg-slate-900 border-slate-800">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+      <div
+        className="opacity-0 animate-fade-in"
+        style={{ animationDelay: "120ms", animationFillMode: "forwards" }}
+      >
+        <SectionLabel>Feature Flags</SectionLabel>
+        <div className="glass rounded-xl p-6 mt-2 space-y-3">
+          <div className="flex items-center gap-2 mb-2">
             <ToggleRight className="h-5 w-5 text-red-400" />
-            Feature Flags
-          </CardTitle>
-          <CardDescription className="text-slate-400">
-            Enable or disable features across the platform
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+            <p className="text-sm text-slate-400">
+              Ativar ou desativar funcionalidades da plataforma
+            </p>
+          </div>
+
           {featureFlags?.map((flag) => (
             <div
               key={flag.id}
-              className="flex items-center justify-between p-4 bg-slate-800 rounded-lg"
+              className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-colors"
             >
               <div className="space-y-0.5">
-                <p className="font-medium text-white">{flag.name}</p>
-                <p className="text-sm text-slate-400">{flag.description}</p>
+                <p className="font-medium text-white text-sm">{flag.name}</p>
+                <p className="text-xs text-slate-400">{flag.description}</p>
                 <p className="text-xs text-slate-500">
-                  Last updated: {formatDateTime(flag.updatedAt)}
+                  Atualizado: {formatDateTime(flag.updatedAt)}
                 </p>
               </div>
               <Switch
@@ -141,12 +149,12 @@ function FeaturesPage() {
 
           {(!featureFlags || featureFlags.length === 0) && (
             <div className="text-center py-8 text-slate-400">
-              <Settings className="h-12 w-12 mx-auto mb-4 text-slate-600" />
-              <p>No feature flags configured</p>
+              <Settings className="h-10 w-10 mx-auto mb-3 text-slate-600" />
+              <p className="text-sm">Nenhuma feature flag configurada</p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

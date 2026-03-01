@@ -18,3 +18,13 @@ services:
       - ./apps/app/src:/app/apps/app/src
       - ./packages:/app/packages
     command: bun run dev:app
+
+  landing:
+    build:
+      context: .
+      dockerfile: apps/landing/Dockerfile
+      target: development
+    volumes:
+      - ./apps/landing/src:/app/apps/landing/src
+      - ./packages:/app/packages
+    command: bun run dev:landing

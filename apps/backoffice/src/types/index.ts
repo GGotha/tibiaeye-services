@@ -190,6 +190,7 @@ export interface LicenseFilters {
   page?: number;
   limit?: number;
   status?: string;
+  search?: string;
   expiringWithinDays?: number;
 }
 

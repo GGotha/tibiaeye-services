@@ -1,5 +1,6 @@
 import { MetricCard } from "@/components/cards/metric-card";
 import { RevenueChart } from "@/components/charts/revenue-chart";
+import { SectionLabel } from "@/components/ui/section-label";
 import {
   Select,
   SelectContent,
@@ -22,58 +23,84 @@ function RevenuePage() {
   const { data: stats } = usePlatformStats();
   const { data: revenueData, isLoading } = useRevenueData(period);
 
+  const arr = stats?.subscriptions?.mrr ? stats.subscriptions.mrr * 12 : 0;
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Revenue Analytics</h1>
+    <div className="space-y-5">
+      <div
+        className="flex items-center justify-between opacity-0 animate-fade-in"
+        style={{ animationDelay: "0ms", animationFillMode: "forwards" }}
+      >
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest text-slate-500">Financeiro</p>
+          <h1 className="text-2xl font-bold text-white mt-0.5">Receita</h1>
+        </div>
         <Select value={period} onValueChange={(v) => setPeriod(v as typeof period)}>
           <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700 text-white">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-slate-900 border-slate-800">
-            <SelectItem value="7d">Last 7 days</SelectItem>
-            <SelectItem value="30d">Last 30 days</SelectItem>
-            <SelectItem value="90d">Last 90 days</SelectItem>
-            <SelectItem value="1y">Last year</SelectItem>
+            <SelectItem value="7d">Ultimos 7 dias</SelectItem>
+            <SelectItem value="30d">Ultimos 30 dias</SelectItem>
+            <SelectItem value="90d">Ultimos 90 dias</SelectItem>
+            <SelectItem value="1y">Ultimo ano</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="MRR"
-          value={stats ? formatCurrency(stats.subscriptions.mrr) : "-"}
-          icon={DollarSign}
-          trend={stats?.subscriptions.mrrGrowth}
-          trendLabel="vs last month"
-        />
-        <MetricCard
-          title="Active Subscriptions"
-          value={stats ? formatNumber(stats.subscriptions.total) : "-"}
-          icon={Users}
-          description="Paying customers"
-        />
-        <MetricCard
-          title="Churn Rate"
-          value={stats ? `${stats.subscriptions.churnRate.toFixed(1)}%` : "-"}
-          icon={TrendingDown}
-          description="Monthly churn"
-        />
-        <MetricCard
-          title="Active Trials"
-          value={stats ? formatNumber(stats.subscriptions.activeTrials) : "-"}
-          icon={TrendingUp}
-          description="Users in trial"
-        />
+      <div
+        className="opacity-0 animate-fade-in"
+        style={{ animationDelay: "60ms", animationFillMode: "forwards" }}
+      >
+        <SectionLabel>Metricas de Receita</SectionLabel>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-2">
+          <MetricCard
+            title="MRR"
+            value={stats?.subscriptions ? formatCurrency(stats.subscriptions.mrr) : "-"}
+            icon={DollarSign}
+            trend={stats?.subscriptions?.mrrGrowth}
+            trendLabel="vs mes anterior"
+            borderColor="border-t-emerald-500/50"
+          />
+          <MetricCard
+            title="ARR"
+            value={arr > 0 ? formatCurrency(arr) : "-"}
+            icon={TrendingUp}
+            description="Receita anual"
+            borderColor="border-t-blue-500/50"
+          />
+          <MetricCard
+            title="Churn"
+            value={stats?.subscriptions ? `${stats.subscriptions.churnRate.toFixed(1)}%` : "-"}
+            icon={TrendingDown}
+            description="Churn mensal"
+            borderColor="border-t-red-500/50"
+          />
+          <MetricCard
+            title="Assinantes"
+            value={stats?.subscriptions ? formatNumber(stats.subscriptions.total) : "-"}
+            icon={Users}
+            description="Pagantes ativos"
+            borderColor="border-t-orange-500/50"
+          />
+        </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-red-500 border-t-transparent" />
+      <div
+        className="opacity-0 animate-fade-in"
+        style={{ animationDelay: "120ms", animationFillMode: "forwards" }}
+      >
+        <SectionLabel>Tendencia</SectionLabel>
+        <div className="mt-2">
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-red-500 border-t-transparent" />
+            </div>
+          ) : (
+            <RevenueChart data={revenueData || []} title="MRR ao Longo do Tempo" />
+          )}
         </div>
-      ) : (
-        <RevenueChart data={revenueData || []} title="MRR Over Time" />
-      )}
+      </div>
     </div>
   );
 }

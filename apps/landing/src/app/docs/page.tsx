@@ -46,26 +46,33 @@ export default function DocsPage() {
   return (
     <main className="min-h-screen pt-16">
       <Navbar />
-      <div className="max-w-4xl mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Documentação</h1>
-          <p className="text-slate-400 text-lg">
+      <div className="max-w-4xl mx-auto px-6 py-16">
+        <div className="text-center mb-20">
+          <p className="text-xs uppercase tracking-[0.15em] text-emerald-400 font-medium mb-5">
+            Docs
+          </p>
+          <h1 className="text-4xl md:text-6xl font-bold text-[#F8FAFC] tracking-[-0.03em] mb-6">
+            Documentação
+          </h1>
+          <p className="text-[#94A3B8] text-lg">
             Tudo que você precisa para começar a usar o TibiaEye.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-5">
           {sections.map((section) => (
             <Link
               key={section.title}
               href={section.href}
-              className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/50 transition-all group"
+              className="glass-card-hover p-7 rounded-2xl group"
             >
-              <div className="inline-flex p-3 rounded-xl bg-emerald-500/10 mb-4 group-hover:bg-emerald-500/20 transition-colors">
+              <div className="inline-flex p-3 rounded-xl bg-emerald-500/10 mb-5 group-hover:bg-emerald-500/15 transition-colors duration-300">
                 <section.icon className="h-6 w-6 text-emerald-400" />
               </div>
-              <h2 className="text-xl font-semibold text-white mb-2">{section.title}</h2>
-              <p className="text-slate-400">{section.description}</p>
+              <h2 className="text-lg font-semibold text-[#F8FAFC] mb-2 tracking-[-0.01em]">
+                {section.title}
+              </h2>
+              <p className="text-[#94A3B8] text-sm leading-relaxed">{section.description}</p>
             </Link>
           ))}
         </div>

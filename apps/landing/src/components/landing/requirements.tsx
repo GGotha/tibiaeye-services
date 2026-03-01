@@ -1,55 +1,77 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { AlertTriangle, CheckCircle, Monitor } from "lucide-react";
+import { CheckCircle, Monitor } from "lucide-react";
+
+const spring = { type: "spring" as const, stiffness: 100, damping: 20 };
+
+const items = [
+  {
+    icon: CheckCircle,
+    iconColor: "text-emerald-400",
+    text: "O Tibia precisa estar rodando e visível na tela",
+  },
+  {
+    icon: CheckCircle,
+    iconColor: "text-emerald-400",
+    text: "Não minimize nem cubra a janela do jogo",
+  },
+  {
+    icon: Monitor,
+    iconColor: "text-cyan-400",
+    text: "Recomendado: Use um segundo monitor",
+    bold: "Recomendado:",
+  },
+  {
+    icon: Monitor,
+    iconColor: "text-cyan-400",
+    text: "Alternativa: Use uma máquina virtual",
+    bold: "Alternativa:",
+  },
+];
 
 export function Requirements() {
   return (
-    <section className="py-16 bg-slate-900/50">
-      <div className="max-w-4xl mx-auto px-4">
+    <section className="relative py-20">
+      <div className="max-w-4xl mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           viewport={{ once: true }}
-          className="p-8 rounded-2xl bg-gradient-to-br from-yellow-500/10 to-orange-500/5 border border-yellow-500/20"
+          transition={spring}
+          className="relative glass-card rounded-2xl p-8 md:p-10 overflow-hidden"
         >
-          <div className="flex flex-col md:flex-row items-start gap-4">
-            <div className="p-3 rounded-xl bg-yellow-500/10 shrink-0">
-              <AlertTriangle className="h-6 w-6 text-yellow-400" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                Importante: Tela Aberta Necessária
-              </h3>
-              <p className="text-slate-400 mb-4">
-                O TibiaEye é um <strong className="text-white">pixel bot</strong> - ele funciona
-                lendo a imagem da tela do jogo em tempo real.
-              </p>
+          {/* Left accent bar */}
+          <div className="absolute left-0 top-6 bottom-6 w-px bg-gradient-to-b from-emerald-500/50 via-emerald-500/20 to-transparent" />
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-emerald-400 mt-0.5 shrink-0" />
-                  <span className="text-slate-300">
-                    O Tibia precisa estar rodando e visível na tela
+          <div className="pl-6">
+            <p className="text-xs uppercase tracking-[0.15em] text-emerald-400 font-medium mb-3">
+              Configuração recomendada
+            </p>
+            <h3 className="text-xl font-bold text-[#F8FAFC] mb-3 tracking-[-0.01em]">
+              Tela Aberta Necessária
+            </h3>
+            <p className="text-[#94A3B8] mb-6">
+              O TibiaEye é um <strong className="text-[#F8FAFC]">pixel bot</strong> — ele funciona
+              lendo a imagem da tela do jogo em tempo real.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {items.map((item) => (
+                <div key={item.text} className="flex items-start gap-3">
+                  <item.icon className={`h-5 w-5 mt-0.5 shrink-0 ${item.iconColor}`} />
+                  <span className="text-[#94A3B8] text-sm">
+                    {item.bold ? (
+                      <>
+                        <strong className="text-[#F8FAFC]">{item.bold}</strong>{" "}
+                        {item.text.replace(item.bold, "").trim()}
+                      </>
+                    ) : (
+                      item.text
+                    )}
                   </span>
                 </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-emerald-400 mt-0.5 shrink-0" />
-                  <span className="text-slate-300">Não minimize nem cubra a janela do jogo</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Monitor className="h-5 w-5 text-cyan-400 mt-0.5 shrink-0" />
-                  <span className="text-slate-300">
-                    <strong className="text-white">Recomendado:</strong> Use um segundo monitor
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Monitor className="h-5 w-5 text-cyan-400 mt-0.5 shrink-0" />
-                  <span className="text-slate-300">
-                    <strong className="text-white">Alternativa:</strong> Use uma máquina virtual
-                  </span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </motion.div>
