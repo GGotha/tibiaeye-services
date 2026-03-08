@@ -25,7 +25,7 @@ RUN bun install --frozen-lockfile
 # ================================
 FROM dependencies AS development
 COPY . .
-EXPOSE 3000
+EXPOSE 3003
 CMD ["bun", "run", "dev:landing"]
 
 # ================================
@@ -53,6 +53,7 @@ COPY --from=builder /app/apps/landing/.next/static ./apps/landing/.next/static
 COPY --from=builder /app/apps/landing/public ./apps/landing/public
 
 USER bun
-EXPOSE 3000
+EXPOSE 3003
+ENV PORT=3003
 
 CMD ["bun", "run", "apps/landing/server.js"]
