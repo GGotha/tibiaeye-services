@@ -13,7 +13,8 @@ import { TibiaSprite } from "@/components/ui/tibia-sprite";
 import { outfitSpriteUrl } from "@/lib/tibia-sprites";
 import type { CharacterWithStatus } from "@/types";
 import { Link } from "@tanstack/react-router";
-import { History, Plus, Trash } from "lucide-react";
+import { Check, Copy, History, Plus, Trash } from "lucide-react";
+import { useState } from "react";
 
 interface CharactersListProps {
   characters: CharacterWithStatus[];
@@ -22,6 +23,14 @@ interface CharactersListProps {
 }
 
 export function CharactersList({ characters, onAddClick, onDelete }: CharactersListProps) {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopyId = async (id: string) => {
+    await navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   return (
     <Card className="bg-slate-900/50 border-slate-800">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -85,6 +94,19 @@ export function CharactersList({ characters, onAddClick, onDelete }: CharactersL
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-slate-400 hover:text-white"
+                        onClick={() => handleCopyId(char.id)}
+                        title="Copy character ID"
+                      >
+                        {copiedId === char.id ? (
+                          <Check className="h-4 w-4 text-emerald-400" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
                       <Button variant="ghost" size="icon" asChild className="h-8 w-8">
                         <Link
                           to="/dashboard/characters/$characterId"

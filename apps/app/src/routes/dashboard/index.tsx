@@ -13,7 +13,7 @@ import { useDashboardStats, useExperienceHourly } from "@/hooks/use-analytics";
 import { useLicenseStatus } from "@/hooks/use-license";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useRealtimeSession } from "@/hooks/use-realtime";
-import { useActiveSession, useSessions } from "@/hooks/use-sessions";
+import { useActiveSessions, useSessions } from "@/hooks/use-sessions";
 import { formatDuration, formatNumber } from "@/lib/utils";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
@@ -40,20 +40,21 @@ function getGreeting() {
 }
 
 function DashboardOverview() {
-  const { data: activeSession } = useActiveSession();
+  const { data: activeSessions = [] } = useActiveSessions();
   const { data: sessionsData } = useSessions({ limit: 5 });
   const { data: licenseStatus } = useLicenseStatus();
   const { data: stats } = useDashboardStats();
-  const { data: experienceData } = useExperienceHourly(activeSession?.id);
+  const primarySession = activeSessions[0] ?? null;
+  const { data: experienceData } = useExperienceHourly(primarySession?.id);
   const { position, botStatus, lastEvent, isConnected } = useRealtimeSession(
-    activeSession?.id ?? "",
+    primarySession?.id ?? "",
   );
-  useNotifications(activeSession?.id, botStatus, lastEvent, isConnected);
+  useNotifications(primarySession?.id, botStatus, lastEvent, isConnected);
 
   const recentSessions =
     sessionsData?.data?.filter((s) => s.status !== "active") ?? [];
 
-  const isLive = !!activeSession;
+  const isLive = activeSessions.length > 0;
 
   return (
     <div className="space-y-5">
@@ -94,13 +95,15 @@ function DashboardOverview() {
         </div>
       </div>
 
-      {/* ── Active Session Banner ── */}
+      {/* ── Active Session Banners ── */}
       {isLive && (
         <div
-          className="opacity-0 animate-slide-up"
+          className="space-y-3 opacity-0 animate-slide-up"
           style={{ animationDelay: "60ms", animationFillMode: "forwards" }}
         >
-          <ActiveSessionBanner session={activeSession} />
+          {activeSessions.map((session) => (
+            <ActiveSessionBanner key={session.id} session={session} />
+          ))}
         </div>
       )}
 

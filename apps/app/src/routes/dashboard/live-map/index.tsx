@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useActiveSession, useSessions } from "@/hooks/use-sessions";
+import { useActiveSessions } from "@/hooks/use-sessions";
 import { formatDuration, formatNumber } from "@/lib/utils";
 import { createFileRoute } from "@tanstack/react-router";
 import { Activity, Clock, Coins, Sword } from "lucide-react";
@@ -21,16 +21,14 @@ export const Route = createFileRoute("/dashboard/live-map/")({
 const CURRENT_SESSION_VALUE = "__current__";
 
 function LiveMapPage() {
-  const { data: activeSession } = useActiveSession();
-  const { data: sessionsData } = useSessions({ status: "active" });
+  const { data: activeSessions = [] } = useActiveSessions();
   const [selectedSessionId, setSelectedSessionId] = useState<string>(CURRENT_SESSION_VALUE);
   const [floor, setFloor] = useState<number>(7);
 
-  const activeSessions = sessionsData?.data ?? [];
   const currentSession =
     selectedSessionId === CURRENT_SESSION_VALUE
-      ? activeSession
-      : activeSessions.find((s) => s.id === selectedSessionId);
+      ? (activeSessions[0] ?? null)
+      : (activeSessions.find((s) => s.id === selectedSessionId) ?? null);
 
   const duration = currentSession
     ? Math.max(0, Math.round((Date.now() - new Date(currentSession.startedAt).getTime()) / 1000))
@@ -46,18 +44,15 @@ function LiveMapPage() {
               <SelectValue placeholder="Select active session" />
             </SelectTrigger>
             <SelectContent className="bg-slate-800 border-slate-700">
-              {activeSession && (
-                <SelectItem value={CURRENT_SESSION_VALUE}>
-                  {activeSession.characterName} (current)
+              {activeSessions.map((session, index) => (
+                <SelectItem
+                  key={session.id}
+                  value={index === 0 ? CURRENT_SESSION_VALUE : session.id}
+                >
+                  {session.characterName}
+                  {index === 0 ? " (current)" : ""}
                 </SelectItem>
-              )}
-              {activeSessions
-                .filter((s) => s.id !== activeSession?.id)
-                .map((session) => (
-                  <SelectItem key={session.id} value={session.id}>
-                    {session.characterName}
-                  </SelectItem>
-                ))}
+              ))}
             </SelectContent>
           </Select>
 

@@ -20,7 +20,7 @@ import { CreateSessionUseCase } from "./use-cases/create-session.use-case.js";
 import { ListSessionsUseCase } from "./use-cases/list-sessions.use-case.js";
 import { GetSessionUseCase } from "./use-cases/get-session.use-case.js";
 import { UpdateSessionUseCase } from "./use-cases/update-session.use-case.js";
-import { GetActiveSessionUseCase } from "./use-cases/get-active-session.use-case.js";
+import { GetActiveSessionsUseCase } from "./use-cases/get-active-session.use-case.js";
 
 export const sessionsController: FastifyPluginAsyncZod = async (app) => {
   const sessionRepo = app.getRepository(SessionEntity);
@@ -93,15 +93,15 @@ export const sessionsController: FastifyPluginAsyncZod = async (app) => {
       onRequest: [app.authenticate],
       schema: {
         tags: ["Sessions"],
-        summary: "Get current active session",
+        summary: "Get all active sessions",
         security: [{ bearerAuth: [] }],
         response: {
-          200: SessionSchema.nullable(),
+          200: z.array(SessionSchema),
         },
       },
     },
     async (request) => {
-      const useCase = new GetActiveSessionUseCase(sessionRepo, characterRepo);
+      const useCase = new GetActiveSessionsUseCase(sessionRepo, characterRepo);
       return useCase.execute(request.user.sub);
     },
   );

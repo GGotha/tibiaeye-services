@@ -17,10 +17,10 @@ export function useSession(id: string) {
   });
 }
 
-export function useActiveSession() {
+export function useActiveSessions() {
   return useQuery({
-    queryKey: ["session", "active"],
-    queryFn: () => api.getActiveSession(),
+    queryKey: ["sessions", "active"],
+    queryFn: () => api.getActiveSessions(),
     refetchInterval: 30000,
   });
 }

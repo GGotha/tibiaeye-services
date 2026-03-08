@@ -146,8 +146,8 @@ class ApiClient {
     return data;
   }
 
-  async getActiveSession() {
-    const { data } = await this.axiosInstance.get<Session | null>("/api/v1/sessions/active");
+  async getActiveSessions() {
+    const { data } = await this.axiosInstance.get<Session[]>("/api/v1/sessions/active");
     return data;
   }
 

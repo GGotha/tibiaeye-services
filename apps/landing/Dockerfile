@@ -10,6 +10,9 @@ WORKDIR /app
 FROM base AS dependencies
 COPY package.json bun.lock turbo.json ./
 COPY apps/landing/package.json ./apps/landing/
+COPY apps/app/package.json ./apps/app/
+COPY apps/backoffice/package.json ./apps/backoffice/
+COPY apps/api/package.json ./apps/api/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/types/package.json ./packages/types/
 COPY packages/config-typescript/package.json ./packages/config-typescript/

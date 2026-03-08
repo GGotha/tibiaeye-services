@@ -4,14 +4,13 @@ import { SessionEntity, SessionStatus } from "../../../entities/session.entity.j
 import { CharacterEntity } from "../../../entities/character.entity.js";
 import type { SessionOutput } from "../schemas.js";
 
-export class GetActiveSessionUseCase {
+export class GetActiveSessionsUseCase {
   constructor(
     private readonly sessionRepo: Repository<SessionEntity>,
     private readonly characterRepo: Repository<CharacterEntity>,
   ) {}
 
-  async execute(userId: string): Promise<SessionOutput | null> {
-    // Get all character IDs for this user
+  async execute(userId: string): Promise<SessionOutput[]> {
     const characters = await this.characterRepo.find({
       where: { userId },
       select: ["id"],
@@ -20,10 +19,10 @@ export class GetActiveSessionUseCase {
     const characterIds = characters.map((c) => c.id);
 
     if (characterIds.length === 0) {
-      return null;
+      return [];
     }
 
-    const session = await this.sessionRepo.findOne({
+    const sessions = await this.sessionRepo.find({
       where: {
         characterId: In(characterIds),
         status: SessionStatus.ACTIVE,
@@ -32,11 +31,7 @@ export class GetActiveSessionUseCase {
       order: { startedAt: "DESC" },
     });
 
-    if (!session) {
-      return null;
-    }
-
-    return {
+    return sessions.map((session) => ({
       id: session.id,
       characterId: session.characterId,
       characterName: session.character.name,
@@ -53,6 +48,6 @@ export class GetActiveSessionUseCase {
       totalLootValue: session.totalLootValue,
       duration: session.duration,
       xpPerHour: session.xpPerHour,
-    };
+    }));
   }
 }

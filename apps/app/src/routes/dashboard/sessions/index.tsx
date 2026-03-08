@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCharacters } from "@/hooks/use-characters";
-import { useActiveSession, useDeleteSession, useSessions } from "@/hooks/use-sessions";
+import { useActiveSessions, useDeleteSession, useSessions } from "@/hooks/use-sessions";
 import { createFileRoute } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
@@ -25,7 +25,7 @@ function SessionsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
 
-  const { data: activeSession } = useActiveSession();
+  const { data: activeSessions = [] } = useActiveSessions();
   const { data: characters = [] } = useCharacters();
   const { data: sessionsData, isLoading } = useSessions({
     page,
@@ -52,10 +52,16 @@ function SessionsPage() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-white">Sessions</h1>
 
-      {activeSession && (
+      {activeSessions.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-white mb-3">Active Session</h2>
-          <ActiveSessionBanner session={activeSession} />
+          <h2 className="text-lg font-semibold text-white mb-3">
+            {activeSessions.length === 1 ? "Active Session" : "Active Sessions"}
+          </h2>
+          <div className="space-y-3">
+            {activeSessions.map((session) => (
+              <ActiveSessionBanner key={session.id} session={session} />
+            ))}
+          </div>
         </div>
       )}
 

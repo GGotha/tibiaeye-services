@@ -54,7 +54,7 @@ describe("ApiClient", () => {
     it("should have session methods", () => {
       expect(typeof api.getSessions).toBe("function");
       expect(typeof api.getSession).toBe("function");
-      expect(typeof api.getActiveSession).toBe("function");
+      expect(typeof api.getActiveSessions).toBe("function");
       expect(typeof api.deleteSession).toBe("function");
     });
 
